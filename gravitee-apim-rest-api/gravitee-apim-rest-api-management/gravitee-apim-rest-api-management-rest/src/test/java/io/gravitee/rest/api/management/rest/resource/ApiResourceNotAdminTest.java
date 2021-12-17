@@ -25,14 +25,18 @@ import static org.mockito.Mockito.*;
 
 import io.gravitee.definition.model.Proxy;
 import io.gravitee.definition.model.VirtualHost;
+import io.gravitee.repository.management.model.Role;
 import io.gravitee.rest.api.model.*;
 import io.gravitee.rest.api.model.api.ApiEntity;
 import io.gravitee.rest.api.model.api.UpdateApiEntity;
+import io.gravitee.rest.api.model.permissions.ApiPermission;
 import io.gravitee.rest.api.model.permissions.RoleScope;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.Priority;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -124,8 +128,6 @@ public class ApiResourceNotAdminTest extends AbstractResourceTest {
     public void shouldGetApi_BecauseDirectMember() {
         MembershipEntity userMembership = mock(MembershipEntity.class);
         when(userMembership.getReferenceId()).thenReturn(API);
-        when(userMembership.getReferenceType()).thenReturn(MembershipReferenceType.API);
-        when(userMembership.getMemberType()).thenReturn(MembershipMemberType.USER);
 
         when(
             membershipService.getMembershipsByMemberAndReference(
@@ -134,7 +136,9 @@ public class ApiResourceNotAdminTest extends AbstractResourceTest {
                 eq(MembershipReferenceType.API)
             )
         )
-            .thenReturn(Sets.newSet(userMembership));
+            .thenReturn(Set.of(userMembership));
+
+        when(apiService.canManageApi(userMembership)).thenReturn(true);
 
         final Response response = envTarget(API).request().get();
 

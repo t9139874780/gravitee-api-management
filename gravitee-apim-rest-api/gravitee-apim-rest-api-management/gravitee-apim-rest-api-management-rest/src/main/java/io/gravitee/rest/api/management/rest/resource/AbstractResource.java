@@ -21,6 +21,7 @@ import static io.gravitee.rest.api.model.MembershipReferenceType.GROUP;
 
 import io.gravitee.rest.api.idp.api.authentication.UserDetails;
 import io.gravitee.rest.api.model.MembershipEntity;
+import io.gravitee.rest.api.model.RoleEntity;
 import io.gravitee.rest.api.model.api.ApiEntity;
 import io.gravitee.rest.api.model.api.ApiQuery;
 import io.gravitee.rest.api.model.permissions.RolePermission;
@@ -135,7 +136,8 @@ public abstract class AbstractResource {
         return membershipService
             .getMembershipsByMemberAndReference(USER, getAuthenticatedUser(), API)
             .stream()
-            .anyMatch(membership -> membership.getReferenceId().equals(api.getId()));
+            .filter(membership -> membership.getReferenceId().equals(api.getId()))
+            .anyMatch(apiService::canManageApi);
     }
 
     private boolean isMemberThroughGroup(ApiEntity api) {
@@ -146,7 +148,6 @@ public abstract class AbstractResource {
         Set<String> groups = membershipService
             .getMembershipsByMemberAndReference(USER, getAuthenticatedUser(), GROUP)
             .stream()
-            .filter(m -> m.getRoleId() != null && roleService.findById(m.getRoleId()).getScope().equals(RoleScope.API))
             .map(MembershipEntity::getReferenceId)
             .collect(Collectors.toSet());
 

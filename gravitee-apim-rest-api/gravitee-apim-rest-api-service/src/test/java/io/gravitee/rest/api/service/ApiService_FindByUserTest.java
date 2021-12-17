@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.PropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.google.common.collect.ImmutableMap;
 import io.gravitee.common.data.domain.Page;
 import io.gravitee.definition.jackson.datatype.GraviteeMapper;
 import io.gravitee.repository.exceptions.TechnicalException;
@@ -105,6 +106,15 @@ public class ApiService_FindByUserTest {
 
     @Test
     public void shouldFindByUser() throws TechnicalException {
+        final String userRoleId = "API_USER";
+
+        Map<String, char[]> userPermissions = ImmutableMap.of("MEMBER", "CRUD".toCharArray());
+        RoleEntity userRole = new RoleEntity();
+        userRole.setId(userRoleId);
+        userRole.setPermissions(userPermissions);
+
+        when(roleService.findById(userRoleId)).thenReturn(userRole);
+
         when(apiRepository.search(new ApiCriteria.Builder().environmentId("DEFAULT").ids(api.getId()).build()))
             .thenReturn(singletonList(api));
 
@@ -114,7 +124,7 @@ public class ApiService_FindByUserTest {
         membership.setMemberType(MembershipMemberType.USER);
         membership.setReferenceId(api.getId());
         membership.setReferenceType(MembershipReferenceType.API);
-        membership.setRoleId("API_USER");
+        membership.setRoleId(userRoleId);
 
         when(membershipService.getMembershipsByMemberAndReference(MembershipMemberType.USER, USER_NAME, MembershipReferenceType.API))
             .thenReturn(Collections.singleton(membership));
@@ -146,6 +156,15 @@ public class ApiService_FindByUserTest {
 
     @Test
     public void shouldFindByUserPaginated() throws TechnicalException {
+        final String userRoleId = "API_USER";
+
+        Map<String, char[]> userPermissions = ImmutableMap.of("MEMBER", "CRUD".toCharArray());
+        RoleEntity userRole = new RoleEntity();
+        userRole.setId(userRoleId);
+        userRole.setPermissions(userPermissions);
+
+        when(roleService.findById(userRoleId)).thenReturn(userRole);
+
         final Api api1 = new Api();
         api1.setId("api1");
         api1.setName("api1");
@@ -159,7 +178,7 @@ public class ApiService_FindByUserTest {
         membership1.setMemberType(MembershipMemberType.USER);
         membership1.setReferenceId(api1.getId());
         membership1.setReferenceType(MembershipReferenceType.API);
-        membership1.setRoleId("API_USER");
+        membership1.setRoleId(userRoleId);
 
         MembershipEntity membership2 = new MembershipEntity();
         membership2.setId(api2.getId());
