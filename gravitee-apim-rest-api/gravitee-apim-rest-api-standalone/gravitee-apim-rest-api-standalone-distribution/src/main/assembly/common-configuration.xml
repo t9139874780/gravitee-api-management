@@ -119,6 +119,7 @@
             <unpack>false</unpack>
             <includes>
                 <include>io.gravitee.*:*:jar</include>
+                <include>com.graviteesource.*:*:*</include>
             </includes>
             <scope>compile</scope>
             <useProjectArtifact>false</useProjectArtifact>
@@ -129,6 +130,7 @@
             <unpack>false</unpack>
             <excludes>
                 <exclude>io.gravitee.*:*:*</exclude>
+                <exclude>com.graviteesource.*:*:*</exclude>
                 <exclude>commons-logging:commons-logging:*</exclude>
                 <exclude>javax.mail:mailapi:*</exclude>
             </excludes>
