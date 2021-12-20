@@ -1,0 +1,134 @@
+{
+  "name": "page",
+  "version": "1",
+  "description": "API with one documentation page",
+  "visibility": "PRIVATE",
+  "gravitee": "2.0.0",
+  "flow_mode": "DEFAULT",
+  "resources": [],
+  "properties": [],
+  "members": [
+    {
+      "source": "memory",
+      "sourceId": "admin",
+      "roles": ["f8e153f5-a457-4cc5-a153-f5a457ecc574"]
+    }
+  ],
+  "pages": [
+    {
+      "id": "67d8020e-b0b3-47d8-9802-0eb0b357d84c",
+      "name": "Aside",
+      "type": "SYSTEM_FOLDER",
+      "order": 0,
+      "published": true,
+      "visibility": "PUBLIC",
+      "lastModificationDate": 1639996615281,
+      "contentType": "application/json",
+      "homepage": false,
+      "parentPath": "",
+      "excludedAccessControls": false,
+      "accessControls": []
+    },
+    {
+      "id": "9cf6fc58-cc5d-49df-b6fc-58cc5d09dfd5",
+      "name": "Documentation",
+      "type": "MARKDOWN",
+      "content": "# Documentation",
+      "order": 1,
+      "lastContributor": "7f87e52e-32ad-4ee6-87e5-2e32adeee688",
+      "published": true,
+      "visibility": "PUBLIC",
+      "lastModificationDate": 1640010765416,
+      "contentType": "application/json",
+      "homepage": true,
+      "parentPath": "",
+      "excludedAccessControls": false,
+      "accessControls": []
+    }
+  ],
+  "plans": [
+    {
+      "id": "d50304ed-bcbd-4c2b-8304-edbcbd6c2bf6",
+      "name": "keyless",
+      "description": "keyless",
+      "validation": "AUTO",
+      "security": "KEY_LESS",
+      "type": "API",
+      "status": "STAGING",
+      "order": 0,
+      "characteristics": [],
+      "created_at": 1639996615540,
+      "updated_at": 1639996615540,
+      "paths": {},
+      "flows": [
+        {
+          "name": "",
+          "path-operator": {
+            "path": "/",
+            "operator": "STARTS_WITH"
+          },
+          "condition": "",
+          "consumers": [],
+          "methods": [],
+          "pre": [],
+          "post": [],
+          "enabled": true
+        }
+      ],
+      "comment_required": false
+    }
+  ],
+  "metadata": [
+    {
+      "key": "email-support",
+      "name": "email-support",
+      "format": "MAIL",
+      "value": "${(api.primaryOwner.email)!''}",
+      "defaultValue": "support@change.me"
+    }
+  ],
+  "path_mappings": [],
+  "proxy": {
+    "virtual_hosts": [
+      {
+        "path": "/page"
+      }
+    ],
+    "strip_context_path": false,
+    "preserve_host": false,
+    "groups": [
+      {
+        "name": "default-group",
+        "endpoints": [
+          {
+            "backup": false,
+            "inherit": true,
+            "name": "default",
+            "weight": 1,
+            "type": "http",
+            "target": "http://localhost:8080/hello-world"
+          }
+        ],
+        "load_balancing": {
+          "type": "ROUND_ROBIN"
+        },
+        "http": {
+          "connectTimeout": 5000,
+          "idleTimeout": 60000,
+          "keepAlive": true,
+          "readTimeout": 10000,
+          "pipelining": false,
+          "maxConcurrentConnections": 100,
+          "useCompression": true,
+          "followRedirects": false
+        }
+      }
+    ]
+  },
+  "response_templates": {},
+  "primaryOwner": {
+    "id": "7f87e52e-32ad-4ee6-87e5-2e32adeee688",
+    "displayName": "admin",
+    "type": "USER"
+  }
+}

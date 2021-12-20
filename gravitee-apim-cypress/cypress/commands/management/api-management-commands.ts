@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { Api, ApiErrorCodes, ApiLifecycleState, PortalApi } from '@model/apis';
+import { ApiImport } from '@model/imports';
 import { User, BasicAuthentication } from '@model/users';
 
 export function createApi(auth: BasicAuthentication, body: Api) {
@@ -41,5 +43,37 @@ export function deleteApi(auth: BasicAuthentication, apiId: string) {
     url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}`,
     auth,
     failOnStatusCode: false,
+  });
+}
+
+export function importCreateApi(auth: BasicAuthentication, body: ApiImport) {
+  return cy.request({
+    method: 'POST',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/import`,
+    body,
+    auth,
+    failOnStatusCode: false,
+  });
+}
+
+export function importUpdateApi(auth: BasicAuthentication, apiId: string, body: ApiImport) {
+  return cy.request({
+    method: 'PUT',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/import`,
+    body,
+    auth,
+    failOnStatusCode: false,
+  });
+}
+
+export function getPages(auth: BasicAuthentication, apiId: string) {
+  return cy.request({
+    method: 'GET',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/pages`,
+    auth,
+    failOnStatusCode: false,
+    qs: {
+      root: true,
+    },
   });
 }
