@@ -131,7 +131,7 @@ context('API - Imports', () => {
   describe('Create API with one page without an ID', function () {
     let apiId, pageId;
 
-    it('should create API and return generated API ID', function () {
+    it('should create an API with one page of documentation and return a generated API ID', function () {
       cy.fixture('json/imports/pages/api-with-page-without-id')
         .then((definition) => importCreateApi(ADMIN_USER, definition))
         .ok()
@@ -175,9 +175,9 @@ context('API - Imports', () => {
 
   describe('Create API with one page without an ID', function () {
     let apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
-    let expectedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
+    let generatedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
 
-    it('should create API and return specified ID', function () {
+    it('should create an API with one page of documentation and return specified ID', function () {
       cy.fixture('json/imports/pages/api-with-page-with-id')
         .then((definition) => importCreateApi(ADMIN_USER, definition))
         .ok()
@@ -193,11 +193,11 @@ context('API - Imports', () => {
           .should('have.length', 2)
           .its(1)
           .should('have.property', 'id')
-          .should('eq', expectedPageId);
+          .should('eq', generatedPageId);
     });
 
-    it('should get API page from specified IDs', function () {
-      getPage(ADMIN_USER, apiId, expectedPageId)
+    it('should get API page from generated page ID', function () {
+      getPage(ADMIN_USER, apiId, generatedPageId)
           .ok()
           .its('body')
           .should('have.property', 'api')

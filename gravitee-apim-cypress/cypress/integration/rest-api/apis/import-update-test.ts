@@ -15,8 +15,11 @@
  */
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import {
-    importUpdateApi
+  deleteApi,
+  importCreateApi,
+  importUpdateApi
 } from '../../../commands/management/api-management-commands';
+import {getPage} from "../../../commands/management/api-pages-management-commands";
 
 context('API - Imports - Update', () => {
 
@@ -31,6 +34,45 @@ context('API - Imports - Update', () => {
             expect(response.body.message).to.eq('Api [unknown-test-id] can not be found.');
           });
       });
+    });
+  });
+
+  describe('Update API with existing documentation page matching generated ID', function() {
+    let apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    let generatedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
+
+    it('should create an API with one page of documentation and return specified API ID', function () {
+      cy.fixture('json/imports/pages/api-with-page-with-id')
+          .then((definition) => importCreateApi(ADMIN_USER, definition))
+          .ok()
+          .its('body')
+          .should('have.property', 'id')
+          .then((id) => {
+            apiId = id;
+          });
+    });
+
+    it('should update API page from specified ID', function () {
+      cy.fixture('json/imports/pages/api-with-page-with-id-update')
+          .then((definition) => importUpdateApi(ADMIN_USER, apiId, definition))
+          .ok()
+          .its('body')
+          .should('have.property', 'id')
+          .should('eq', apiId);
+    });
+
+    it('should get updated API page from generated page ID', function () {
+      getPage(ADMIN_USER, apiId, generatedPageId)
+          .ok()
+          .its('body')
+          .should(page => {
+            expect(page.name).to.eq('Documentation (updated)');
+            expect(page.content).to.eq("# Documentation\n##Contributing\nTo be done.");
+          });
+    });
+
+    it('should delete the API', function() {
+      deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 });
