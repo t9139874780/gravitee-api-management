@@ -47,7 +47,7 @@ context.only('API - Imports', () => {
   describe('Create empty API with specified ID', function () {
     let apiId;
 
-    it('should create API and return his ID', function () {
+    it('should create API and return the specified ID', function () {
       cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
         importCreateApi(ADMIN_USER, definition)
           .ok()
@@ -58,7 +58,7 @@ context.only('API - Imports', () => {
       });
     });
 
-    it('should get created API with his ID', function () {
+    it('should get created API with the specified ID', function () {
       getApiById(ADMIN_USER, apiId)
         .ok()
         .should((response) => {
