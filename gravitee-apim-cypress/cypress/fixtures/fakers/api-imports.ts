@@ -15,18 +15,16 @@
  */
 import * as faker from 'faker';
 import {ApiImport, ApiImportPage, ApiImportProxyGroupLoadBalancerType} from '@model/imports';
-import { ApiFlowMode, ApiVisibility } from '@model/apis';
+import {ApiFlowMode, ApiPageType, ApiVisibility} from '@model/apis';
 import {ApiFakers} from "./apis";
 
 export class ApiImportFakers {
   static api(attributes?: Partial<ApiImport>): ApiImport {
-    const id = faker.datatype.uuid();
     const name = faker.commerce.productName();
     const version = ApiFakers.version();
     const description = faker.commerce.productDescription();
 
     return {
-      id,
       name,
       version,
       description,
@@ -85,10 +83,20 @@ export class ApiImportFakers {
   }
 
   static page(attributes?: Partial<ApiImportPage>): ApiImportPage {
-    const name = faker.commerce.productName();
+    const content = faker.lorem.paragraph(3);
 
-    return <ApiImportPage>{
-      name,
+    return {
+      name: 'Documentation',
+      type: ApiPageType.MARKDOWN,
+      content,
+      order: 1,
+      published: false,
+      visibility: ApiVisibility.PUBLIC,
+      contentType: 'application/json',
+      homepage: false,
+      parentPath: '',
+      excludedAccessControls: false,
+      accessControls: [],
       ...attributes,
     };
   }

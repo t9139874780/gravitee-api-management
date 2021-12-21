@@ -128,18 +128,21 @@ export interface ApiImport {
 }
 
 export interface ApiImportPage {
-  id: string;
+  id?: string;
   name: string;
   type: ApiPageType;
+  content?: string;
   order: number;
   published: boolean;
   visibility: ApiVisibility;
-  lastModificationDate: number;
+  lastModificationDate?: number;
+  lastContributor?: string;
   contentType: string;
   homepage: boolean;
   parentPath: string;
   excludedAccessControls: boolean;
   accessControls: any[];
+  api?: string;
 }
 
 export interface ApiImportMetadata {
