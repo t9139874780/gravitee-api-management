@@ -42,7 +42,7 @@ export class ApiImportFakers {
       proxy: {
         virtual_hosts: [
           {
-            path: faker.helpers.slugify(name),
+            path: `/${faker.helpers.slugify(name)}`,
           },
         ],
         strip_context_path: false,
