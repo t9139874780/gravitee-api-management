@@ -16,20 +16,6 @@
   ],
   "pages": [
     {
-      "id": "67d8020e-b0b3-47d8-9802-0eb0b357d84c",
-      "name": "Aside",
-      "type": "SYSTEM_FOLDER",
-      "order": 0,
-      "published": true,
-      "visibility": "PUBLIC",
-      "lastModificationDate": 1639996615281,
-      "contentType": "application/json",
-      "homepage": false,
-      "parentPath": "",
-      "excludedAccessControls": false,
-      "accessControls": []
-    },
-    {
       "id": "9cf6fc58-cc5d-49df-b6fc-58cc5d09dfd5",
       "name": "Documentation",
       "type": "MARKDOWN",
@@ -44,38 +30,6 @@
       "parentPath": "",
       "excludedAccessControls": false,
       "accessControls": []
-    }
-  ],
-  "plans": [
-    {
-      "id": "d50304ed-bcbd-4c2b-8304-edbcbd6c2bf6",
-      "name": "keyless",
-      "description": "keyless",
-      "validation": "AUTO",
-      "security": "KEY_LESS",
-      "type": "API",
-      "status": "STAGING",
-      "order": 0,
-      "characteristics": [],
-      "created_at": 1639996615540,
-      "updated_at": 1639996615540,
-      "paths": {},
-      "flows": [
-        {
-          "name": "",
-          "path-operator": {
-            "path": "/",
-            "operator": "STARTS_WITH"
-          },
-          "condition": "",
-          "consumers": [],
-          "methods": [],
-          "pre": [],
-          "post": [],
-          "enabled": true
-        }
-      ],
-      "comment_required": false
     }
   ],
   "metadata": [
