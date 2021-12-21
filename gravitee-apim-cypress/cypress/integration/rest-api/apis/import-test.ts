@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
-import { deleteApi, getPages, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
+import { deleteApi, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
+import { getPages } from '../../../commands/management/api-pages-management-commands';
 
 context('API - Imports', () => {
   describe('Create empty API without ID', function () {
