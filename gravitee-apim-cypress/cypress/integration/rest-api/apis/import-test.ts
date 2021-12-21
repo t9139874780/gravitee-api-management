@@ -13,14 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
+import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
 import { deleteApi, getPages, importCreateApi } from '../../../commands/management/api-management-commands';
+import { gio } from "../../../commands/gravitee.commands";
 
-context.only('API - Imports', () => {
-  describe('Create API', function () {
+
+context('API - Imports', () => {
     afterEach(function () {
-      deleteApi(ADMIN_USER, this.apiId).httpStatus(204);
+        deleteApi(ADMIN_USER, this.apiId).httpStatus(204);
     });
+
+    describe('Create API', function () {
+        it('should generate API ID when import API without ID', function () {
+            cy.fixture('json/imports/apis/api-empty-without-id').then((definition) => {
+                importCreateApi(ADMIN_USER, definition)
+                    .ok()
+                    .should((response) => {
+                        expect(response.body.id).to.not.be.null;
+
+                        const apiId = response.body.id;
+                        expect(apiId).to.not.be.null;
+
+                        cy.wrap(apiId).as('apiId');
+
+                        gio
+                            .management(ADMIN_USER)
+                            .apis()
+                            .getApiById(apiId)
+                            .ok()
+                            .should((response) => {
+                                expect(response.body.id).to.eq(apiId);
+                            });
+                    });
+            });
+        });
+    });
+
+  describe('Create API with pages', function () {
 
     it('should create an API from import with two page of documentation', function () {
       cy.fixture('json/imports/pages/api-with-documentation').then((definition) => {
