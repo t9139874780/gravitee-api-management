@@ -17,7 +17,7 @@
 import { Api, ApiErrorCodes, ApiLifecycleState, PortalApi } from '@model/apis';
 import { ApiImport } from '@model/imports';
 import { User, BasicAuthentication } from '@model/users';
-import {ErrorableManagement} from "@model/technical";
+import { ErrorableManagement } from '@model/technical';
 
 export function createApi(auth: BasicAuthentication, body: Api) {
   return cy.request({
