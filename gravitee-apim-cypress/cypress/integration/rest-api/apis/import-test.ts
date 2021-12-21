@@ -72,10 +72,10 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create API with documentation pages', function () {
+  describe('Create API with one page without an ID', function () {
     let apiId, pageId;
 
-    it('should create API from import definition', function () {
+    it('should create API and return generated API ID', function () {
       cy.fixture('json/imports/pages/api-with-page-without-id')
         .then((definition) => importCreateApi(ADMIN_USER, definition))
         .ok()
@@ -86,12 +86,22 @@ context('API - Imports', () => {
         });
     });
 
-    it('should get API documentation pages from generated ID', function () {
+    it('should get API documentation pages from generated API ID', function () {
       getPages(ADMIN_USER, apiId)
         .ok()
         .its('body')
         .should('have.length', 2)
         .its(1)
+        .should('have.property', 'id')
+        .then((id) => {
+          pageId = id;
+        });
+    });
+
+    it('should get page from generated page ID', function () {
+      getPage(ADMIN_USER, apiId, pageId)
+        .ok()
+        .its('body')
         .should((page) => {
           expect(page.order).to.eq(1);
           expect(page.type).to.eq('MARKDOWN');
@@ -99,18 +109,47 @@ context('API - Imports', () => {
           expect(page.content).to.eq('# Documentation');
           expect(page.published).to.be.true;
           expect(page.homepage).to.be.true;
-        })
-        .then((page) => {
-          pageId = page.id;
         });
-    });
-
-    it('should get page from generated page ID', function () {
-      getPage(ADMIN_USER, apiId, pageId).ok();
     });
 
     it('should delete the API', function () {
       deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Create API with one page without an ID', function () {
+    let apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    let expectedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
+
+    it('should create API and return specified ID', function () {
+      cy.fixture('json/imports/pages/api-with-page-with-id')
+        .then((definition) => importCreateApi(ADMIN_USER, definition))
+        .ok()
+        .its('body')
+        .should('have.property', 'id')
+        .should('eq', apiId);
+    });
+
+    it('should get API documentation pages from specified API ID', function () {
+      getPages(ADMIN_USER, apiId)
+          .ok()
+          .its('body')
+          .should('have.length', 2)
+          .its(1)
+          .should('have.property', 'id')
+          .should('eq', expectedPageId);
+    });
+
+    it('should get API page from specified IDs', function () {
+      getPage(ADMIN_USER, apiId, expectedPageId)
+          .ok()
+          .its('body')
+          .should('have.property', 'api')
+          .should('eq', apiId);
+    });
+
+    it('should delete the API', function () {
+      deleteApi(ADMIN_USER, '08a92f8c-e133-42ec-a92f-8ce13382ec73').noContent();
     });
   });
 });
