@@ -13,68 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
-import { deleteApi, getPages, importCreateApi } from '../../../commands/management/api-management-commands';
-import { gio } from "../../../commands/gravitee.commands";
+import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
+import { deleteApi, getPages, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
 
+context.only('API - Imports', () => {
 
-context('API - Imports', () => {
-    afterEach(function () {
-        deleteApi(ADMIN_USER, this.apiId).httpStatus(204);
-    });
+    describe('Create empty API without ID', function () {
+        let apiId;
 
-    describe('Create API', function () {
-        it('should generate API ID when import API without ID', function () {
+        it('should create API and return generated ID', function () {
             cy.fixture('json/imports/apis/api-empty-without-id').then((definition) => {
                 importCreateApi(ADMIN_USER, definition)
                     .ok()
                     .should((response) => {
-                        expect(response.body.id).to.not.be.null;
-
-                        const apiId = response.body.id;
+                        apiId = response.body.id;
                         expect(apiId).to.not.be.null;
-
                         cy.wrap(apiId).as('apiId');
-
-                        gio
-                            .management(ADMIN_USER)
-                            .apis()
-                            .getApiById(apiId)
-                            .ok()
-                            .should((response) => {
-                                expect(response.body.id).to.eq(apiId);
-                            });
                     });
             });
         });
+
+        it('should get created API with generated ID', function () {
+            getApiById(ADMIN_USER, apiId).ok().should((response) => {
+                expect(response.body.id).to.eq(apiId);
+            });
+        });
+
+        it('should delete created API', function () {
+            deleteApi(ADMIN_USER, apiId).httpStatus(204);
+        });
     });
 
-  describe('Create API with pages', function () {
+  describe('Create API pages', function () {
 
-    it('should create an API from import with two page of documentation', function () {
-      cy.fixture('json/imports/pages/api-with-documentation').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .httpStatus(200)
-          .should((response) => {
-            expect(response.body.id).to.not.be.null;
-
-            const apiId = response.body.id;
-
-            expect(response.body.name).to.eq(definition.name);
-            expect(response.body.version).to.eq(definition.version);
-            expect(response.body.visibility).to.eq(definition.visibility);
-            expect(response.body.state).to.eq('STOPPED');
-            expect(response.body.lifecycle_state).to.eq('CREATED');
-
-            cy.wrap(apiId).as('apiId');
-
-            getPages(ADMIN_USER, apiId)
-              .httpStatus(200)
-              .should((response) => {
-                expect(response.body.length).to.eq(2);
-              });
+      it('should create an API from import with one page of documentation', function () {
+          cy.fixture('json/imports/pages/api-with-documentation').then((definition) => {
+              importCreateApi(ADMIN_USER, definition)
+                  .httpStatus(200)
+                  .then((response) => cy.wrap(response.body.id).as('apiId'))
+                  .then((apiId) => getPages(ADMIN_USER, this.apiId))
+                  .httpStatus(200)
+                  .then((response) => response.body)
+                  .should((pages) => {
+                      expect(pages.length).to.eq(2);
+                      expect(pages[0].order).to.eq(0);
+                      expect(pages[0].type).to.eq('SYSTEM_FOLDER');
+                      expect(pages[1].order).to.eq(1);
+                      expect(pages[1].type).to.eq('MARKDOWN');
+                      expect(pages[1].name).to.eq('Documentation');
+                      expect(pages[1].content).to.eq('# Documentation');
+                      expect(pages[1].published).to.be.true;
+                      expect(pages[1].homepage).to.be.true;
+                  });
           });
       });
-    });
   });
 });

@@ -17,6 +17,7 @@
 import { Api, ApiErrorCodes, ApiLifecycleState, PortalApi } from '@model/apis';
 import { ApiImport } from '@model/imports';
 import { User, BasicAuthentication } from '@model/users';
+import {ErrorableManagement} from "@model/technical";
 
 export function createApi(auth: BasicAuthentication, body: Api) {
   return cy.request({
@@ -70,6 +71,18 @@ export function getPages(auth: BasicAuthentication, apiId: string) {
   return cy.request({
     method: 'GET',
     url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/pages`,
+    auth,
+    failOnStatusCode: false,
+    qs: {
+      root: true,
+    },
+  });
+}
+
+export function getApiById(auth: BasicAuthentication, apiId: string) {
+  return cy.request({
+    method: 'GET',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}`,
     auth,
     failOnStatusCode: false,
     qs: {
