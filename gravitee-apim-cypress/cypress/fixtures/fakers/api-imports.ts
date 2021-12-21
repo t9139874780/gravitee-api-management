@@ -84,9 +84,10 @@ export class ApiImportFakers {
 
   static page(attributes?: Partial<ApiImportPage>): ApiImportPage {
     const content = faker.lorem.paragraph(3);
+    const name = faker.commerce.productName();
 
     return {
-      name: 'Documentation',
+      name,
       type: ApiPageType.MARKDOWN,
       content,
       order: 1,
