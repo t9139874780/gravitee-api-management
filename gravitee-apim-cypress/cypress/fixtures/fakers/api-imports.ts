@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import * as faker from 'faker';
-import {ApiImport, ApiImportPage, ApiImportProxyGroupLoadBalancerType} from '@model/imports';
-import {ApiFlowMode, ApiPageType, ApiVisibility} from '@model/apis';
-import {ApiFakers} from "./apis";
+import { ApiImport, ApiImportPage, ApiImportProxyGroupLoadBalancerType } from '@model/imports';
+import { ApiFlowMode, ApiPageType, ApiVisibility } from '@model/apis';
+import { ApiFakers } from './apis';
 
 export class ApiImportFakers {
   static api(attributes?: Partial<ApiImport>): ApiImport {

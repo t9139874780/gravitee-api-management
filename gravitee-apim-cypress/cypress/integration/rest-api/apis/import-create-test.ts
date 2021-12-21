@@ -131,12 +131,12 @@ context('API - Imports', () => {
   });
 
   describe('Create API with one page without an ID', function () {
-    const api = ApiImportFakers.api({ pages: [ApiImportFakers.page()] });
+    const fakeApi = ApiImportFakers.api({ pages: [ApiImportFakers.page()] });
 
     let apiId, pageId;
 
     it('should create an API with one page of documentation and return a generated API ID', function () {
-      importCreateApi(ADMIN_USER, api)
+      importCreateApi(ADMIN_USER, fakeApi)
         .ok()
         .its('body')
         .should('have.property', 'id')
@@ -181,11 +181,11 @@ context('API - Imports', () => {
     const pageId = '7b95cbe6-099d-4b06-95cb-e6099d7b0609';
     const generatedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
 
-    const page = ApiImportFakers.page({ id: pageId });
-    const api = ApiImportFakers.api({ id: apiId, pages: [page] });
+    const fakePage = ApiImportFakers.page({ id: pageId });
+    const fakeApi = ApiImportFakers.api({ id: apiId, pages: [fakePage] });
 
     it('should create an API with one page of documentation and return specified ID', function () {
-      importCreateApi(ADMIN_USER, api).ok().its('body').should('have.property', 'id').should('eq', apiId);
+      importCreateApi(ADMIN_USER, fakeApi).ok().its('body').should('have.property', 'id').should('eq', apiId);
     });
 
     it('should get API documentation pages from specified API ID', function () {
