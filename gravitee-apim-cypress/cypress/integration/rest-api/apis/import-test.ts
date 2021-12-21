@@ -45,7 +45,7 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create empty API with specified ID', function () {
+  describe('Create empty API with specified ID, not yet existing', function () {
     let apiId;
 
     it('should create API and return the specified ID', function () {
@@ -71,6 +71,62 @@ context('API - Imports', () => {
       deleteApi(ADMIN_USER, apiId).httpStatus(204);
     });
   });
+
+    describe('Create empty API with specified ID, already existing', function () {
+        let apiId;
+
+        it('should create API with the specified ID', function () {
+            cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
+                importCreateApi(ADMIN_USER, definition)
+                    .ok()
+                    .should((response) => {
+                        apiId = response.body.id;
+                    });
+            });
+        });
+
+        it('should fail to create API with the same ID', function () {
+            cy.fixture('json/imports/apis/api-empty-with-same-id-another-context-path').then((definition) => {
+                importCreateApi(ADMIN_USER, definition)
+                    .badRequest()
+                    .should((response) => {
+                        expect(response.body.message).to.eq('An api [67d8020e-b0b3-47d8-9802-0eb0b357d84c] already exists.');
+                    });
+            });
+        });
+
+        it('should delete created API', function () {
+            deleteApi(ADMIN_USER, apiId).httpStatus(204);
+        });
+    });
+
+    describe('Create empty API with an already existing context path', function () {
+        let apiId;
+
+        it('should create API with the specified ID', function () {
+            cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
+                importCreateApi(ADMIN_USER, definition)
+                    .ok()
+                    .should((response) => {
+                        apiId = response.body.id;
+                    });
+            });
+        });
+
+        it('should fail to create API with the same context path', function () {
+            cy.fixture('json/imports/apis/api-empty-with-same-context-path-another-id').then((definition) => {
+                importCreateApi(ADMIN_USER, definition)
+                    .badRequest()
+                    .should((response) => {
+                        expect(response.body.message).to.eq('The path [/testimport/] is already covered by an other API.');
+                    });
+            });
+        });
+
+        it('should delete created API', function () {
+            deleteApi(ADMIN_USER, apiId).httpStatus(204);
+        });
+    });
 
   describe('Create API with one page without an ID', function () {
     let apiId, pageId;
