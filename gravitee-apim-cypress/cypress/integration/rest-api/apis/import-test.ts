@@ -15,7 +15,7 @@
  */
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import { deleteApi, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
-import { getPages } from '../../../commands/management/api-pages-management-commands';
+import { getPages, getPage } from '../../../commands/management/api-pages-management-commands';
 
 context('API - Imports', () => {
   describe('Create empty API without ID', function () {
@@ -73,10 +73,10 @@ context('API - Imports', () => {
   });
 
   describe('Create API with documentation pages', function () {
-    let apiId;
+    let apiId, pageId;
 
     it('should create API from import definition', function () {
-      cy.fixture('json/imports/pages/api-with-documentation')
+      cy.fixture('json/imports/pages/api-with-page-without-id')
         .then((definition) => importCreateApi(ADMIN_USER, definition))
         .ok()
         .its('body')
@@ -91,17 +91,22 @@ context('API - Imports', () => {
         .ok()
         .its('body')
         .should('have.length', 2)
-        .should((pages) => {
-          expect(pages.length).to.eq(2);
-          expect(pages[0].order).to.eq(0);
-          expect(pages[0].type).to.eq('SYSTEM_FOLDER');
-          expect(pages[1].order).to.eq(1);
-          expect(pages[1].type).to.eq('MARKDOWN');
-          expect(pages[1].name).to.eq('Documentation');
-          expect(pages[1].content).to.eq('# Documentation');
-          expect(pages[1].published).to.be.true;
-          expect(pages[1].homepage).to.be.true;
+        .its(1)
+        .should((page) => {
+          expect(page.order).to.eq(1);
+          expect(page.type).to.eq('MARKDOWN');
+          expect(page.name).to.eq('Documentation');
+          expect(page.content).to.eq('# Documentation');
+          expect(page.published).to.be.true;
+          expect(page.homepage).to.be.true;
+        })
+        .then((page) => {
+          pageId = page.id;
         });
+    });
+
+    it('should get page from generated page ID', function () {
+      getPage(ADMIN_USER, apiId, pageId).ok();
     });
 
     it('should delete the API', function () {
