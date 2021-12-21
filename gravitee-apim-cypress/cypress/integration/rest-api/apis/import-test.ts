@@ -16,7 +16,7 @@
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import { deleteApi, getPages, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
 
-context.only('API - Imports', () => {
+context('API - Imports', () => {
   describe('Create empty API without ID', function () {
     let apiId;
 
@@ -71,27 +71,40 @@ context.only('API - Imports', () => {
     });
   });
 
-  describe('Create API pages', function () {
-    it('should create an API from import with one page of documentation', function () {
-      cy.fixture('json/imports/pages/api-with-documentation').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .httpStatus(200)
-          .then((response) => cy.wrap(response.body.id).as('apiId'))
-          .then((apiId) => getPages(ADMIN_USER, this.apiId))
-          .httpStatus(200)
-          .then((response) => response.body)
-          .should((pages) => {
-            expect(pages.length).to.eq(2);
-            expect(pages[0].order).to.eq(0);
-            expect(pages[0].type).to.eq('SYSTEM_FOLDER');
-            expect(pages[1].order).to.eq(1);
-            expect(pages[1].type).to.eq('MARKDOWN');
-            expect(pages[1].name).to.eq('Documentation');
-            expect(pages[1].content).to.eq('# Documentation');
-            expect(pages[1].published).to.be.true;
-            expect(pages[1].homepage).to.be.true;
-          });
-      });
+    describe('Create API with documentation pages', function () {
+        let apiId;
+
+        it('should create API from import definition', function () {
+            cy.fixture('json/imports/pages/api-with-documentation')
+                .then((definition) => importCreateApi(ADMIN_USER, definition))
+                .ok()
+                .its('body')
+                .should('have.property', 'id')
+                .then((id) => {
+                    apiId = id;
+                });
+        });
+
+        it('should get API documentation pages from generated ID', function () {
+            getPages(ADMIN_USER, apiId)
+                .ok()
+                .its('body')
+                .should('have.length', 2)
+                .should((pages) => {
+                    expect(pages.length).to.eq(2);
+                    expect(pages[0].order).to.eq(0);
+                    expect(pages[0].type).to.eq('SYSTEM_FOLDER');
+                    expect(pages[1].order).to.eq(1);
+                    expect(pages[1].type).to.eq('MARKDOWN');
+                    expect(pages[1].name).to.eq('Documentation');
+                    expect(pages[1].content).to.eq('# Documentation');
+                    expect(pages[1].published).to.be.true;
+                    expect(pages[1].homepage).to.be.true;
+                });
+        });
+
+        it ('should delete the API', function() {
+            deleteApi(ADMIN_USER, apiId).noContent();
+        });
     });
-  });
 });
