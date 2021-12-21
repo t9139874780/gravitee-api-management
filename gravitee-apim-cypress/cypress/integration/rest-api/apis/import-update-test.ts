@@ -39,17 +39,14 @@ context('API - Imports - Update', () => {
 
     const fakeApi = ApiImportFakers.api({ id: apiId });
     const fakePage = ApiImportFakers.page({ id: pageId });
+
     fakeApi.pages = [fakePage];
 
     const apiUpdate = ApiImportFakers.api(fakeApi);
-    const pageUpdate = ApiImportFakers.page({
-      ...fakePage,
-      ...{
-        name: 'Documentation (updated)',
-        content: '# Documentation\n##Contributing\nTo be done.',
-      }
-    });
+    const pageUpdate = ApiImportFakers.page(fakePage);
 
+    pageUpdate.name = 'Documentation (updated)'
+    pageUpdate.content = '# Documentation\n## Contributing\nTo be done.'
     apiUpdate.pages = [pageUpdate];
 
     it('should create an API with one page of documentation and return specified API ID', function () {
@@ -70,7 +67,7 @@ context('API - Imports - Update', () => {
         .its('body')
         .should((page) => {
           expect(page.name).to.eq('Documentation (updated)');
-          expect(page.content).to.eq('# Documentation\n##Contributing\nTo be done.');
+          expect(page.content).to.eq('# Documentation\n## Contributing\nTo be done.');
         });
     });
 
