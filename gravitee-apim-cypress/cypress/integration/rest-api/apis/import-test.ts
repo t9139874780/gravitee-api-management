@@ -28,7 +28,6 @@ context.only('API - Imports', () => {
                     .should((response) => {
                         apiId = response.body.id;
                         expect(apiId).to.not.be.null;
-                        cy.wrap(apiId).as('apiId');
                     });
             });
         });
