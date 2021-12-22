@@ -524,6 +524,68 @@ context('API - Imports - Update', () => {
     });
   });
 
+  describe('Update API with plan without ID matching name of one existing plan', () => {
+
+    const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    const fakePlan1 = ApiImportFakers.plan({name: 'test plan', description: 'this is a test plan'});
+    const fakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1]});
+
+    // this update will update the plan of the existing API, cause it has the same name
+    const updateFakePlan = ApiImportFakers.plan({name: 'test plan', description: 'this is the updated description'});
+    const updatedFakeApi = ApiImportFakers.api({ id: apiId, plans: [updateFakePlan] });
+
+    it('should create the API', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should update the API', () => {
+      importUpdateApi(ADMIN_USER, apiId, updatedFakeApi).ok();
+    });
+
+    it('should get the API plan, which has been updated', () => {
+      getPlans(ADMIN_USER, apiId, ApiPlanStatus.STAGING).ok().should((response) => {
+        expect(response.body).to.have.length(1);
+        expect(response.body[0].description).to.eq('this is the updated description');
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with missing plans from already existing API', () => {
+
+    // existing API contains 2 plans
+    const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    const fakePlan1 = ApiImportFakers.plan({name:'test plan 1'});
+    const fakePlan2 = ApiImportFakers.plan({name:'test plan 2'});
+    const fakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1, fakePlan2]});
+
+    // update API contains 1 other plan
+    const updateFakePlan = ApiImportFakers.plan({name:'test plan 3'});
+    const updatedFakeApi = ApiImportFakers.api({ id: apiId, plans: [updateFakePlan] });
+
+    it('should create the API', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should update the API', () => {
+      importUpdateApi(ADMIN_USER, apiId, updatedFakeApi).ok();
+    });
+
+    it('should get the API plan, containing only the plan that was in the update', () => {
+      getPlans(ADMIN_USER, apiId, ApiPlanStatus.STAGING).ok().should((response) => {
+        expect(response.body).to.have.length(1);
+        expect(response.body[0].name).to.eq('test plan 3');
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
   describe('Update API with with group name that already exists', () => {
     const apiId = "70fbb369-5672-43e6-8a8c-ff7aa81a6055";
     const groupName = 'customers';
