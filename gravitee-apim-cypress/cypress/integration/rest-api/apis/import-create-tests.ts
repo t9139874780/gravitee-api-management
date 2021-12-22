@@ -21,7 +21,7 @@ import { ApiMetadataFormat } from '@model/apis';
 import {getPlan} from "../../../commands/management/api-plans-management-commands";
 import {ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType} from "@model/apis";
 import {GroupFakers} from "../../../fixtures/fakers/groups";
-import {createGroup, deleteGroup} from "../../../commands/management/environment-management-commands";
+import {createGroup, deleteGroup, getGroup} from "../../../commands/management/environment-management-commands";
 
 context('API - Imports', () => {
 
@@ -492,6 +492,42 @@ context('API - Imports', () => {
 
     it ('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Create API with with group name that does not exists', () => {
+    const apiId = "533efd8a-22e1-4483-a8af-0c24a2abd590";
+    const groupName = 'performances';
+    const fakeApi = ApiImportFakers.api({ id: apiId, groups: [ groupName ] });
+
+    let groupId;
+
+    it ('should create an API associated to the "performances" group', () => {
+      importCreateApi(ADMIN_USER, fakeApi)
+          .ok()
+          .its('body')
+          .should('have.property', 'groups')
+          .should('have.length', 1)
+          .its(0)
+          .then(id => {
+            groupId = id;
+          });
+    });
+
+    it ('should get the created group', () => {
+      getGroup(ADMIN_USER, groupId)
+          .ok()
+          .its('body')
+          .should('have.property', 'name')
+          .should('eq', 'performances')
+    });
+
+    it ('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+
+    it ('should delete the group', () => {
+      deleteGroup(ADMIN_USER, groupId).noContent();
     });
   });
 });
