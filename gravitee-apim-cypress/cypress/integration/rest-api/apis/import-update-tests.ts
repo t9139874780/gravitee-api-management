@@ -132,10 +132,92 @@ context('API - Imports - Update', () => {
   });
 
   describe('Update API which ID in URL exists, with another API ID in body', () => {
-    // TODO
+      const apiId1 = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+      const fakeCreateApi1 = ApiImportFakers.api({ id: apiId1, name: 'originalName' });
+
+      const apiId2 = '67d8020e-b0b3-47d8-9802-0eb0b357d899';
+      const fakeCreateApi2 = ApiImportFakers.api({ id: apiId2, name: 'originalName' });
+
+      // that will update api2, with api1 id in body
+      const fakeUpdateApi = ApiImportFakers.api({ id: apiId1, name: 'updatedName' });
+
+      it('should create API 1', () => {
+          importCreateApi(ADMIN_USER, fakeCreateApi1).ok();
+      });
+
+      it('should create API 2', () => {
+          importCreateApi(ADMIN_USER, fakeCreateApi2).ok();
+      });
+
+      it('should update API 2, event if api1 id in body', () => {
+          importUpdateApi(ADMIN_USER, apiId2, fakeUpdateApi)
+              .ok()
+              .should((response) => {
+                  expect(response.body.id).to.eq(apiId2);
+              });
+      });
+
+      it('should get API1 with unchanged data', () => {
+          getApiById(ADMIN_USER, apiId1)
+              .ok()
+              .should((response) => {
+                  expect(response.body.name).to.eq('originalName');
+              });
+      });
+
+      it('should get API2 with updated data', () => {
+          getApiById(ADMIN_USER, apiId2)
+              .ok()
+              .should((response) => {
+                  expect(response.body.name).to.eq('updatedName');
+              });
+      });
+
+      it('should delete created API 1', () => {
+          deleteApi(ADMIN_USER, apiId1).httpStatus(204);
+      });
+
+      it('should delete created API 2', () => {
+          deleteApi(ADMIN_USER, apiId2).httpStatus(204);
+      });
   });
 
   describe('Update API with an updated context path matching another API context path', () => {
-    // TODO
+
+      const apiId1 = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+      const fakeCreateApi1 = ApiImportFakers.api({ id: apiId1 });
+      fakeCreateApi1.proxy.virtual_hosts[0].path = "/importTest1";
+
+      const apiId2 = '67d8020e-b0b3-47d8-9802-0eb0b357d899';
+      const fakeCreateApi2 = ApiImportFakers.api({ id: apiId2 });
+      fakeCreateApi2.proxy.virtual_hosts[0].path = "/importTest2";
+
+      // that will try to update api2, with the same context path as api1
+      const fakeUpdateApi = ApiImportFakers.api();
+      fakeUpdateApi.proxy.virtual_hosts[0].path = "/importTest1";
+
+      it('should create API 1', () => {
+          importCreateApi(ADMIN_USER, fakeCreateApi1).ok();
+      });
+
+      it('should create API 2', () => {
+          importCreateApi(ADMIN_USER, fakeCreateApi2).ok();
+      });
+
+      it('should fail to update API 2 with same context path as API 1', () => {
+          importUpdateApi(ADMIN_USER, apiId2, fakeUpdateApi)
+              .badRequest()
+              .should((response) => {
+                  expect(response.body.message).to.eq("The path [/importTest1/] is already covered by an other API.");
+              });
+      });
+
+      it('should delete created API 1', () => {
+          deleteApi(ADMIN_USER, apiId1).httpStatus(204);
+      });
+
+      it('should delete created API 2', () => {
+          deleteApi(ADMIN_USER, apiId2).httpStatus(204);
+      });
   });
 });
