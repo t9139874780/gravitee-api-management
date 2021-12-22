@@ -17,21 +17,22 @@ import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import { deleteApi, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
 import { getPages, getPage } from '../../../commands/management/api-pages-management-commands';
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import { ApiFakers } from '../../../fixtures/fakers/apis';
 
 context('API - Imports', () => {
-  describe('Create empty API without ID', function () {
+
+  describe('Create API without ID', function () {
+
     let apiId;
+    const fakeApi = ApiImportFakers.api();
 
     it('should create API and return generated ID', function () {
-      cy.fixture('json/imports/apis/api-empty-without-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .ok()
-          .should((response) => {
-            apiId = response.body.id;
-            expect(apiId).to.not.be.null;
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi)
+        .ok()
+        .should((response) => {
+          apiId = response.body.id;
+          expect(apiId).to.not.be.null;
+          expect(apiId).to.not.be.empty;
+        });
     });
 
     it('should get created API with generated ID', function () {
@@ -47,18 +48,17 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create empty API with specified ID, not yet existing', function () {
-    let apiId;
+  describe('Create API with specified ID, not yet existing', function () {
+
+    const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+    const fakeApi = ApiImportFakers.api({ id: apiId });
 
     it('should create API and return the specified ID', function () {
-      cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .ok()
-          .should((response) => {
-            apiId = response.body.id;
-            expect(apiId).to.eq('67d8020e-b0b3-47d8-9802-0eb0b357d84c');
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi)
+        .ok()
+        .should((response) => {
+          expect(response.body.id).to.eq(apiId);
+        });
     });
 
     it('should get created API with the specified ID', function () {
@@ -74,27 +74,31 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create empty API with specified ID, already existing', function () {
-    let apiId;
+  describe('Create API with specified ID, already existing', function () {
+
+    const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+
+    const fakeApi1 = ApiImportFakers.api({ id: apiId });
+    fakeApi1.proxy.virtual_hosts[0].path = "/testimport1/";
+
+    // api 2 has different context path as api 1, but same ID
+    const fakeApi2 = ApiImportFakers.api({ id: apiId });
+    fakeApi2.proxy.virtual_hosts[0].path = "/testimport2/";
 
     it('should create API with the specified ID', function () {
-      cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .ok()
-          .should((response) => {
-            apiId = response.body.id;
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi1)
+        .ok()
+        .should((response) => {
+          expect(response.body.id).to.eq(apiId);
+        });
     });
 
     it('should fail to create API with the same ID', function () {
-      cy.fixture('json/imports/apis/api-empty-with-same-id-another-context-path').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .badRequest()
-          .should((response) => {
-            expect(response.body.message).to.eq('An api [67d8020e-b0b3-47d8-9802-0eb0b357d84c] already exists.');
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi2)
+        .badRequest()
+        .should((response) => {
+          expect(response.body.message).to.eq('An api [67d8020e-b0b3-47d8-9802-0eb0b357d84c] already exists.');
+        });
     });
 
     it('should delete created API', function () {
@@ -103,30 +107,34 @@ context('API - Imports', () => {
   });
 
   describe('Create empty API with an already existing context path', function () {
-    let apiId;
+
+    const apiId1 = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+    const fakeApi1 = ApiImportFakers.api({ id: apiId1 });
+    fakeApi1.proxy.virtual_hosts[0].path = "/testimport/";
+
+    // api2 has different ID, but same context path as api 1
+    const apiId2 = '67d8020e-b0b3-47d8-9802-0eb0b357d84d';
+    const fakeApi2 = ApiImportFakers.api({ id: apiId2 });
+    fakeApi2.proxy.virtual_hosts[0].path = "/testimport/";
 
     it('should create API with the specified ID', function () {
-      cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .ok()
-          .should((response) => {
-            apiId = response.body.id;
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi1)
+        .ok()
+        .should((response) => {
+          expect(response.body.id).to.eq(apiId1);
+        });
     });
 
     it('should fail to create API with the same context path', function () {
-      cy.fixture('json/imports/apis/api-empty-with-same-context-path-another-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .badRequest()
-          .should((response) => {
-            expect(response.body.message).to.eq('The path [/testimport/] is already covered by an other API.');
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeApi2)
+        .badRequest()
+        .should((response) => {
+          expect(response.body.message).to.eq('The path [/testimport/] is already covered by an other API.');
+        });
     });
 
     it('should delete created API', function () {
-      deleteApi(ADMIN_USER, apiId).httpStatus(204);
+      deleteApi(ADMIN_USER, apiId1).httpStatus(204);
     });
   });
 
