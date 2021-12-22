@@ -115,7 +115,7 @@ context('API - Imports - Update', () => {
     });
 
     it('should delete created API', () => {
-      deleteApi(ADMIN_USER, apiId).httpStatus(204);
+      deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 

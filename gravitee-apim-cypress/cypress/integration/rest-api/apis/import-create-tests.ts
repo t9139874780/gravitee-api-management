@@ -46,7 +46,7 @@ context('API - Imports', () => {
     });
 
     it('should delete created API', () => {
-      deleteApi(ADMIN_USER, apiId).httpStatus(204);
+      deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
@@ -72,7 +72,7 @@ context('API - Imports', () => {
     });
 
     it('should delete created API', () => {
-      deleteApi(ADMIN_USER, apiId).httpStatus(204);
+      deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
@@ -104,7 +104,7 @@ context('API - Imports', () => {
     });
 
     it('should delete created API', () => {
-      deleteApi(ADMIN_USER, apiId).httpStatus(204);
+      deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
@@ -223,8 +223,8 @@ context('API - Imports', () => {
     let planId2;
 
     const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
-    const fakePlan1 = ApiImportFakers.plan({name: 'first test plan', description: 'this is the first test plan'});
-    const fakePlan2 = ApiImportFakers.plan({name: 'second test plan', description: 'this is the second test plan'});
+    const fakePlan1 = ApiImportFakers.plan({name: 'test plan', description: 'this is a test plan'});
+    const fakePlan2 = ApiImportFakers.plan({name: 'test plan', description: 'this is a test plan'});
     const fakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1, fakePlan2] });
 
     it('should create an API and returns created plans in response', () => {
@@ -243,8 +243,8 @@ context('API - Imports', () => {
     it('should get plan1 with correct data', () => {
       getPlan(ADMIN_USER, apiId, planId1).ok().should((response) => {
         expect(response.body.id).to.eq(planId1);
-        expect(response.body.name).to.eq('first test plan');
-        expect(response.body.description).to.eq('this is the first test plan');
+        expect(response.body.name).to.eq('test plan');
+        expect(response.body.description).to.eq('this is a test plan');
         expect(response.body.validation).to.eq(ApiPlanValidationType.AUTO);
         expect(response.body.security).to.eq(ApiPlanSecurityType.KEY_LESS);
         expect(response.body.type).to.eq(ApiPlanType.API);
@@ -256,13 +256,39 @@ context('API - Imports', () => {
     it('should get plan2 with correct data', () => {
       getPlan(ADMIN_USER, apiId, planId2).ok().should((response) => {
         expect(response.body.id).to.eq(planId2);
-        expect(response.body.name).to.eq('second test plan');
-        expect(response.body.description).to.eq('this is the second test plan');
+        expect(response.body.name).to.eq('test plan');
+        expect(response.body.description).to.eq('this is a test plan');
         expect(response.body.validation).to.eq(ApiPlanValidationType.AUTO);
         expect(response.body.security).to.eq(ApiPlanSecurityType.KEY_LESS);
         expect(response.body.type).to.eq(ApiPlanType.API);
         expect(response.body.status).to.eq(ApiPlanStatus.STAGING);
         expect(response.body.order).to.eq(0);
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe.skip('Create API with plan with ID that already exists', () => {
+
+    let apiId;
+    const planId = '08a99999-e999-4999-a999-8ce19992e999';
+
+    const fakePlan = ApiImportFakers.plan({id: planId, name: 'first test plan', description: 'this is the first test plan'});
+    const fakeApi1 = ApiImportFakers.api({ plans: [fakePlan] });
+    const fakeApi2 = ApiImportFakers.api({ plans: [fakePlan] });
+
+    it('should create API 1', () => {
+      importCreateApi(ADMIN_USER, fakeApi1).ok().then((response) => {
+        apiId = response.body.id;
+      });
+    });
+
+    it('should fail to create API 2, cause plan, already exists on API 1', () => {
+      importCreateApi(ADMIN_USER, fakeApi2).badRequest().should((response) => {
+        expect(response.body.message).to.eq('A plan with id [08a99999-e999-4999-a999-8ce19992e999] already exists.');
       });
     });
 
