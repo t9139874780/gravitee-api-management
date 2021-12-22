@@ -20,12 +20,12 @@ import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
 
 context('API - Imports', () => {
 
-  describe('Create API without ID', function () {
+  describe('Create API without ID',  () => {
 
     let apiId;
     const fakeApi = ApiImportFakers.api();
 
-    it('should create API and return generated ID', function () {
+    it('should create API and return generated ID', () => {
       importCreateApi(ADMIN_USER, fakeApi)
         .ok()
         .should((response) => {
@@ -35,7 +35,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should get created API with generated ID', function () {
+    it('should get created API with generated ID', () => {
       getApiById(ADMIN_USER, apiId)
         .ok()
         .should((response) => {
@@ -43,17 +43,17 @@ context('API - Imports', () => {
         });
     });
 
-    it('should delete created API', function () {
+    it('should delete created API', () => {
       deleteApi(ADMIN_USER, apiId).httpStatus(204);
     });
   });
 
-  describe('Create API with specified ID, not yet existing', function () {
+  describe('Create API with specified ID, not yet existing', () => {
 
     const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
     const fakeApi = ApiImportFakers.api({ id: apiId });
 
-    it('should create API and return the specified ID', function () {
+    it('should create API and return the specified ID', () => {
       importCreateApi(ADMIN_USER, fakeApi)
         .ok()
         .should((response) => {
@@ -61,7 +61,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should get created API with the specified ID', function () {
+    it('should get created API with the specified ID', () => {
       getApiById(ADMIN_USER, apiId)
         .ok()
         .should((response) => {
@@ -69,12 +69,12 @@ context('API - Imports', () => {
         });
     });
 
-    it('should delete created API', function () {
+    it('should delete created API', () => {
       deleteApi(ADMIN_USER, apiId).httpStatus(204);
     });
   });
 
-  describe('Create API with specified ID, already existing', function () {
+  describe('Create API with specified ID, already existing', () => {
 
     const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
 
@@ -85,7 +85,7 @@ context('API - Imports', () => {
     const fakeApi2 = ApiImportFakers.api({ id: apiId });
     fakeApi2.proxy.virtual_hosts[0].path = "/testimport2/";
 
-    it('should create API with the specified ID', function () {
+    it('should create API with the specified ID', () => {
       importCreateApi(ADMIN_USER, fakeApi1)
         .ok()
         .should((response) => {
@@ -93,7 +93,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should fail to create API with the same ID', function () {
+    it('should fail to create API with the same ID', () => {
       importCreateApi(ADMIN_USER, fakeApi2)
         .badRequest()
         .should((response) => {
@@ -101,12 +101,12 @@ context('API - Imports', () => {
         });
     });
 
-    it('should delete created API', function () {
+    it('should delete created API', () => {
       deleteApi(ADMIN_USER, apiId).httpStatus(204);
     });
   });
 
-  describe('Create empty API with an already existing context path', function () {
+  describe('Create empty API with an already existing context path', () => {
 
     const apiId1 = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
     const fakeApi1 = ApiImportFakers.api({ id: apiId1 });
@@ -117,7 +117,7 @@ context('API - Imports', () => {
     const fakeApi2 = ApiImportFakers.api({ id: apiId2 });
     fakeApi2.proxy.virtual_hosts[0].path = "/testimport/";
 
-    it('should create API with the specified ID', function () {
+    it('should create API with the specified ID', () => {
       importCreateApi(ADMIN_USER, fakeApi1)
         .ok()
         .should((response) => {
@@ -125,7 +125,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should fail to create API with the same context path', function () {
+    it('should fail to create API with the same context path', () => {
       importCreateApi(ADMIN_USER, fakeApi2)
         .badRequest()
         .should((response) => {
@@ -133,17 +133,17 @@ context('API - Imports', () => {
         });
     });
 
-    it('should delete created API', function () {
+    it('should delete created API', () => {
       deleteApi(ADMIN_USER, apiId1).httpStatus(204);
     });
   });
 
-  describe('Create API with one page without an ID', function () {
+  describe('Create API with one page without an ID', () => {
     const fakeApi = ApiImportFakers.api({ pages: [ApiImportFakers.page()] });
 
     let apiId, pageId;
 
-    it('should create an API with one page of documentation and return a generated API ID', function () {
+    it('should create an API with one page of documentation and return a generated API ID', () => {
       importCreateApi(ADMIN_USER, fakeApi)
         .ok()
         .its('body')
@@ -153,7 +153,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should get API documentation pages from generated API ID', function () {
+    it('should get API documentation pages from generated API ID', () => {
       getPages(ADMIN_USER, apiId)
         .ok()
         .its('body')
@@ -165,7 +165,7 @@ context('API - Imports', () => {
         });
     });
 
-    it('should get page from generated page ID', function () {
+    it('should get page from generated page ID', () => {
       getPage(ADMIN_USER, apiId, pageId)
         .ok()
         .its('body')
@@ -179,12 +179,12 @@ context('API - Imports', () => {
         });
     });
 
-    it('should delete the API', function () {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
-  describe('Create API with one page with an ID', function () {
+  describe('Create API with one page with an ID', () => {
     const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
     const pageId = '7b95cbe6-099d-4b06-95cb-e6099d7b0609';
     const generatedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
@@ -192,11 +192,11 @@ context('API - Imports', () => {
     const fakePage = ApiImportFakers.page({ id: pageId });
     const fakeApi = ApiImportFakers.api({ id: apiId, pages: [fakePage] });
 
-    it('should create an API with one page of documentation and return specified ID', function () {
+    it('should create an API with one page of documentation and return specified ID', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok().its('body').should('have.property', 'id').should('eq', apiId);
     });
 
-    it('should get API documentation pages from specified API ID', function () {
+    it('should get API documentation pages from specified API ID', () => {
       getPages(ADMIN_USER, apiId)
         .ok()
         .its('body')
@@ -206,11 +206,11 @@ context('API - Imports', () => {
         .should('eq', generatedPageId);
     });
 
-    it('should get API page from generated page ID', function () {
+    it('should get API page from generated page ID', () => {
       getPage(ADMIN_USER, apiId, generatedPageId).ok().its('body').should('have.property', 'api').should('eq', apiId);
     });
 
-    it('should delete the API', function () {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, '08a92f8c-e133-42ec-a92f-8ce13382ec73').noContent();
     });
   });

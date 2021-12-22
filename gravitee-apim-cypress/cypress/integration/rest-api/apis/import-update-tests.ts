@@ -20,10 +20,10 @@ import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
 import {fake} from "faker";
 
 context('API - Imports - Update', () => {
-  describe('Update API which ID in URL does not exist', function () {
+  describe('Update API which ID in URL does not exist', () => {
     const api = ApiImportFakers.api({ id: 'unknown-test-id' });
 
-    it('should fail to update API, returning 404', function () {
+    it('should fail to update API, returning 404', () => {
       importUpdateApi(ADMIN_USER, 'unknown-test-id', api)
         .notFound()
         .should((response) => {
@@ -32,7 +32,7 @@ context('API - Imports - Update', () => {
     });
   });
 
-  describe('Update API with existing documentation page matching generated ID', function () {
+  describe('Update API with existing documentation page matching generated ID', () => {
     const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
     const pageId = '7b95cbe6-099d-4b06-95cb-e6099d7b0609';
     const generatedPageId = 'c02077fc-7c4d-3c93-8404-6184a6221391';
@@ -49,11 +49,11 @@ context('API - Imports - Update', () => {
     pageUpdate.content = '# Documentation\n## Contributing\nTo be done.'
     apiUpdate.pages = [pageUpdate];
 
-    it('should create an API with one page of documentation and return specified API ID', function () {
+    it('should create an API with one page of documentation and return specified API ID', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok().its('body').should('have.property', 'id').should('eq', apiId);
     });
 
-    it('should update API page from specified ID', function () {
+    it('should update API page from specified ID', () => {
       importUpdateApi(ADMIN_USER, apiId, apiUpdate)
         .ok()
         .its('body')
@@ -61,7 +61,7 @@ context('API - Imports - Update', () => {
         .should('eq', apiId);
     });
 
-    it('should get updated API page from generated page ID', function () {
+    it('should get updated API page from generated page ID', () => {
       getPage(ADMIN_USER, apiId, generatedPageId)
         .ok()
         .its('body')
@@ -71,15 +71,15 @@ context('API - Imports - Update', () => {
         });
     });
 
-    it('should delete the API', function () {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
-  describe('Update API which ID in URL exists, without ID in body', function () {
+  describe('Update API which ID in URL exists, without ID in body', () => {
     let apiId;
 
-    it('should create API with the specified ID', function () {
+    it('should create API with the specified ID', () => {
       cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
         importCreateApi(ADMIN_USER, definition)
           .ok()
@@ -89,7 +89,7 @@ context('API - Imports - Update', () => {
       });
     });
 
-    it('should update the API with the specified ID, even if no ID in body', function () {
+    it('should update the API with the specified ID, even if no ID in body', () => {
       cy.fixture('json/imports/apis/api-empty-without-id-updated-data').then((definition) => {
         importUpdateApi(ADMIN_USER, apiId, definition)
           .ok()
@@ -99,7 +99,7 @@ context('API - Imports - Update', () => {
       });
     });
 
-    it('should get updated API with updated data', function () {
+    it('should get updated API with updated data', () => {
       getApiById(ADMIN_USER, apiId)
         .ok()
         .should((response) => {
@@ -112,16 +112,16 @@ context('API - Imports - Update', () => {
         });
     });
 
-    it('should delete created API', function () {
+    it('should delete created API', () => {
       deleteApi(ADMIN_USER, apiId).httpStatus(204);
     });
   });
 
-  describe('Update API which ID in URL exists, with another API ID in body', function () {
+  describe('Update API which ID in URL exists, with another API ID in body', () => {
     // TODO
   });
 
-  describe('Update API with an updated context path matching another API context path', function () {
+  describe('Update API with an updated context path matching another API context path', () => {
     // TODO
   });
 });
