@@ -422,7 +422,7 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create API with metadata having an empty key', () => {
+  describe('Create API with metadata having an undefined key', () => {
     const apiId = '4d73b285-5b87-4186-928e-f6f6240708f3';
 
     const fakeApi = ApiImportFakers.api({

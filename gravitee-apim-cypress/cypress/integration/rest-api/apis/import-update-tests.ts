@@ -441,4 +441,42 @@ context('API - Imports - Update', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
+
+  describe('Update API with metadata having an undefined key', () => {
+    const apiId = 'a67e7015-224c-4c32-abaa-231f58d4e542';
+
+    const fakeApi = ApiImportFakers.api({
+      id: apiId
+    });
+
+    it('should create an API with no metadata', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it ('should update the API, adding metadata with an undefined key', () => {
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.metadata =  [
+        {
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'Product',
+        },
+      ];
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
+    });
+
+    it('should get the API metadata', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Product',
+        apiId: '6e7ea58c-519d-4ba6-957b-ea49912627e6',
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
 });
