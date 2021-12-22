@@ -271,6 +271,33 @@ context('API - Imports', () => {
     });
   });
 
+  describe.skip('Create API with plan with ID that does not exist yet', () => {
+
+    let apiId;
+    const planId = '08a99999-e999-4999-a999-8ce19992e999';
+
+    const fakePlan = ApiImportFakers.plan({id: planId, name: 'first test plan', description: 'this is the first test plan'});
+    const fakeApi = ApiImportFakers.api({ plans: [fakePlan] });
+
+    it('should create API, and response should contains created plan with specified id', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok().should((response) => {
+        apiId = response.body.id;
+        expect(response.body.plans).to.have.length(1);
+        expect(response.body.plans[0].id).to.eq(planId);
+      });
+    });
+
+    it('should get created plan with specified id', () => {
+      getPlan(ADMIN_USER, apiId, planId).ok().should((response) => {
+        expect(response.body.id).to.eq(planId);
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
   describe.skip('Create API with plan with ID that already exists', () => {
 
     let apiId;
