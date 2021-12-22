@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
-import { deleteApi, getApiById, importCreateApi, importUpdateApi } from '../../../commands/management/api-management-commands';
+import {
+  deleteApi,
+  getApiById,
+  getApiMetadata,
+  importCreateApi,
+  importUpdateApi
+} from '../../../commands/management/api-management-commands';
 import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import { ApiVisibility } from '@model/apis';
+import {ApiMetadataFormat, ApiVisibility} from '@model/apis';
 
 context('API - Imports - Update', () => {
   describe('Update API which ID in URL does not exist', () => {
@@ -332,8 +338,9 @@ context('API - Imports - Update', () => {
     });
 
     it('should update the API, removing its pages', () => {
-      fakeApi.pages = [];
-      importUpdateApi(ADMIN_USER, apiId, fakeApi).ok();
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.pages = [];
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
     });
 
     it('should not have deleted pages', () => {
@@ -341,6 +348,60 @@ context('API - Imports - Update', () => {
     });
 
     it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with some metadata having key that already exists', () => {
+    const apiId = 'aa7f03dc-4ccf-434b-80b2-e5af22b0c76a';
+
+    const fakeApi = ApiImportFakers.api({
+      id: apiId,
+      metadata: [{
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Ops',
+      }]
+    });
+
+    it('should create an API with some metadata having a key with value "team"', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should get the API metadata', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Ops',
+        apiId: 'aa7f03dc-4ccf-434b-80b2-e5af22b0c76a',
+      });
+    });
+
+    it ('should update the API metadata having the key "team"', () => {
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.metadata = [{
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'DevOps',
+      }];
+
+      importUpdateApi(ADMIN_USER, apiId, fakeApi).ok();
+    });
+
+    it('should get the updated API metadata', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').should('have.length', 2).its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'DevOps',
+        apiId: 'aa7f03dc-4ccf-434b-80b2-e5af22b0c76a',
+      });
+    });
+
+    it ('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
