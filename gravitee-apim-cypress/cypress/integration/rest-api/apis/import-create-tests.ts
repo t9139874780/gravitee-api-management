@@ -17,6 +17,8 @@ import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import { deleteApi, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
 import { getPages, getPage } from '../../../commands/management/api-pages-management-commands';
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
+import {getPlan} from "../../../commands/management/api-plans-management-commands";
+import {ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType} from "@model/apis";
 
 context('API - Imports', () => {
 
@@ -214,4 +216,59 @@ context('API - Imports', () => {
       deleteApi(ADMIN_USER, '08a92f8c-e133-42ec-a92f-8ce13382ec73').noContent();
     });
   });
+
+  describe('Create API with plans without an ID', () => {
+
+    let planId1;
+    let planId2;
+
+    const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    const fakePlan1 = ApiImportFakers.plan({name: 'first test plan', description: 'this is the first test plan'});
+    const fakePlan2 = ApiImportFakers.plan({name: 'second test plan', description: 'this is the second test plan'});
+    const fakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1, fakePlan2] });
+
+    it('should create an API and returns created plans in response', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok().should((response) => {
+        expect(response.body.plans).to.be.length(2);
+        planId1 = response.body.plans[0].id;
+        planId2 = response.body.plans[1].id;
+        expect(planId1).to.not.be.null;
+        expect(planId1).to.not.be.empty;
+        expect(planId2).to.not.be.null;
+        expect(planId2).to.not.be.empty;
+        expect(planId1).to.not.eq(planId2);
+      });
+    });
+
+    it('should get plan1 with correct data', () => {
+      getPlan(ADMIN_USER, apiId, planId1).ok().should((response) => {
+        expect(response.body.id).to.eq(planId1);
+        expect(response.body.name).to.eq('first test plan');
+        expect(response.body.description).to.eq('this is the first test plan');
+        expect(response.body.validation).to.eq(ApiPlanValidationType.AUTO);
+        expect(response.body.security).to.eq(ApiPlanSecurityType.KEY_LESS);
+        expect(response.body.type).to.eq(ApiPlanType.API);
+        expect(response.body.status).to.eq(ApiPlanStatus.STAGING);
+        expect(response.body.order).to.eq(0);
+      });
+    });
+
+    it('should get plan2 with correct data', () => {
+      getPlan(ADMIN_USER, apiId, planId2).ok().should((response) => {
+        expect(response.body.id).to.eq(planId2);
+        expect(response.body.name).to.eq('second test plan');
+        expect(response.body.description).to.eq('this is the second test plan');
+        expect(response.body.validation).to.eq(ApiPlanValidationType.AUTO);
+        expect(response.body.security).to.eq(ApiPlanSecurityType.KEY_LESS);
+        expect(response.body.type).to.eq(ApiPlanType.API);
+        expect(response.body.status).to.eq(ApiPlanStatus.STAGING);
+        expect(response.body.order).to.eq(0);
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
 });

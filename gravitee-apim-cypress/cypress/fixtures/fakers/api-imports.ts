@@ -123,7 +123,7 @@ export class ApiImportFakers {
       status: ApiPlanStatus.STAGING,
       order: 1,
       characteristics: [],
-      paths: [],
+      paths: {},
       flows: [],
       comment_required: false,
       ...attributes,
