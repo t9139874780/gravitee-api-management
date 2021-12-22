@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
-import {
-  deleteApi,
-  getApiById,
-  importCreateApi,
-  importUpdateApi
-} from '../../../commands/management/api-management-commands';
-import {getPage} from '../../../commands/management/api-pages-management-commands';
-import {ApiImportFakers} from '../../../fixtures/fakers/api-imports';
-import {ApiVisibility} from "@model/apis";
+import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
+import { deleteApi, getApiById, importCreateApi, importUpdateApi } from '../../../commands/management/api-management-commands';
+import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
+import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
+import { ApiVisibility } from '@model/apis';
 
 context('API - Imports - Update', () => {
   describe('Update API which ID in URL does not exist', () => {
@@ -50,8 +45,8 @@ context('API - Imports - Update', () => {
     const apiUpdate = ApiImportFakers.api(fakeApi);
     const pageUpdate = ApiImportFakers.page(fakePage);
 
-    pageUpdate.name = 'Documentation (updated)'
-    pageUpdate.content = '# Documentation\n## Contributing\nTo be done.'
+    pageUpdate.name = 'Documentation (updated)';
+    pageUpdate.content = '# Documentation\n## Contributing\nTo be done.';
     apiUpdate.pages = [pageUpdate];
 
     it('should create an API with one page of documentation and return specified API ID', () => {
@@ -59,11 +54,7 @@ context('API - Imports - Update', () => {
     });
 
     it('should update API page from specified ID', () => {
-      importUpdateApi(ADMIN_USER, apiId, apiUpdate)
-        .ok()
-        .its('body')
-        .should('have.property', 'id')
-        .should('eq', apiId);
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok().its('body').should('have.property', 'id').should('eq', apiId);
     });
 
     it('should get updated API page from generated page ID', () => {
@@ -82,20 +73,17 @@ context('API - Imports - Update', () => {
   });
 
   describe('Update API which ID in URL exists, without ID in body', () => {
-
     const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
     const fakeCreateApi = ApiImportFakers.api({ id: apiId });
 
     // update API data. body doesn't contains API id
-    const fakeUpdateApi = ApiImportFakers.api(
-        {
-          name: 'updatedName',
-          version: '1.1',
-          description: 'Updated API description',
-          visibility: ApiVisibility.PUBLIC,
-        }
-    );
-    fakeUpdateApi.proxy.virtual_hosts[0].path = "/updated/path";
+    const fakeUpdateApi = ApiImportFakers.api({
+      name: 'updatedName',
+      version: '1.1',
+      description: 'Updated API description',
+      visibility: ApiVisibility.PUBLIC,
+    });
+    fakeUpdateApi.proxy.virtual_hosts[0].path = '/updated/path';
 
     it('should create API with the specified ID', () => {
       importCreateApi(ADMIN_USER, fakeCreateApi)
@@ -219,5 +207,119 @@ context('API - Imports - Update', () => {
       it('should delete created API 2', () => {
           deleteApi(ADMIN_USER, apiId2).httpStatus(204);
       });
+  });
+
+  describe('Update API with page without ID, with name not corresponding to an existing page', () => {
+    const apiId = 'f5cc6ea7-1ea1-46dd-a48f-34a0386467b4';
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+    const pageName = 'documentation';
+    const fakePage = ApiImportFakers.page({ name: pageName });
+
+    it('should create an API with no documentation page', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should update the API, adding one documentation page with an name and without an ID', () => {
+      cy.wrap(fakePage).should('not.have.a.property', 'id');
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.pages.push(ApiImportFakers.page(fakePage));
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
+    });
+
+    it('should have created the page', () => {
+      getPages(ADMIN_USER, apiId).ok().its('body').should('have.length', 2).its(1).should('have.property', 'name').should('eq', pageName);
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with page without ID, with name corresponding to one only existing page', () => {
+    const apiId = '7f996cc8-27a7-489a-af67-e3b56ec5debb';
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    const pageName = 'documentation';
+
+    const fakePage = ApiImportFakers.page({
+      name: pageName,
+      content: 'Not much to look at\n',
+    });
+
+    fakeApi.pages.push(fakePage);
+
+    it('should create an API with one page of documentation', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should get API documentation page content', () => {
+      getPages(ADMIN_USER, apiId)
+        .ok()
+        .its('body')
+        .should('have.length', 2)
+        .its(1)
+        .should('have.property', 'content')
+        .should('eq', 'Not much to look at\n');
+    });
+
+    it('should update API documentation page content from name', () => {
+      const pageUpdate = ApiImportFakers.page(fakePage);
+      pageUpdate.content = '# API\n';
+
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.pages.push(pageUpdate);
+
+      cy.wrap(pageUpdate).should('not.have.a.property', 'id');
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
+    });
+
+    it('should have updated API documentation page content from name', () => {
+      getPages(ADMIN_USER, apiId)
+        .ok()
+        .its('body')
+        .should('have.length', 2)
+        .its(1)
+        .should('have.property', 'content')
+        .should('eq', '# API\n');
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with page without ID, with name corresponding to multiple existing page', () => {
+    const apiId = '283fea9a-563c-494b-b8f3-2883d876765e';
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+    const pageName = 'A Conflicting Name';
+
+    fakeApi.pages.push(ApiImportFakers.page({ name: pageName }));
+    fakeApi.pages.push(ApiImportFakers.page({ name: pageName }));
+
+    it('should create an API with two pages of documentation having the same name', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should get three pages of documentation', () => {
+      getPages(ADMIN_USER, apiId).ok().its('body').should('have.length', 3);
+    });
+
+    it('should fail when trying to add a page with a conflicting name and without an ID', () => {
+      const pageUpdate = ApiImportFakers.page({ name: pageName });
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.pages.push(pageUpdate);
+      cy.wrap(pageUpdate).should('not.have.a.property', 'id');
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate)
+        .httpStatus(500)
+        .its('body')
+        .should('have.property', 'message')
+        .should('eq', 'Not able to identify the page to update: A Conflicting Name. Too much pages with the same name');
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
   });
 });
