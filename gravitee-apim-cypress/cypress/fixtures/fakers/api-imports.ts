@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 import * as faker from 'faker';
-import { ApiImport, ApiImportPage, ApiImportProxyGroupLoadBalancerType } from '@model/imports';
-import { ApiFlowMode, ApiPageType, ApiVisibility } from '@model/apis';
+import {ApiImport, ApiImportPage, ApiImportPlan, ApiImportProxyGroupLoadBalancerType} from '@model/imports';
+import {
+  ApiFlowMode,
+  ApiPageType,
+  ApiPlanSecurityType,
+  ApiPlanStatus,
+  ApiPlanType,
+  ApiPlanValidationType,
+  ApiVisibility
+} from '@model/apis';
 import { ApiFakers } from './apis';
 
 export class ApiImportFakers {
@@ -98,6 +106,26 @@ export class ApiImportFakers {
       parentPath: '',
       excludedAccessControls: false,
       accessControls: [],
+      ...attributes,
+    };
+  }
+
+  static plan(attributes?: Partial<ApiImportPlan>): ApiImportPlan {
+    const name = faker.commerce.productName();
+    const description = faker.commerce.productDescription();
+
+    return {
+      name,
+      description,
+      validation: ApiPlanValidationType.AUTO,
+      security: ApiPlanSecurityType.KEY_LESS,
+      type: ApiPlanType.API,
+      status: ApiPlanStatus.STAGING,
+      order: 1,
+      characteristics: [],
+      paths: [],
+      flows: [],
+      comment_required: false,
       ...attributes,
     };
   }

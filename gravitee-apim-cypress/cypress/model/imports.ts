@@ -46,7 +46,7 @@ export interface ApiImportFlow {
 }
 
 export interface ApiImportPlan {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   validation: ApiPlanValidationType;
@@ -55,8 +55,8 @@ export interface ApiImportPlan {
   status: ApiPlanStatus;
   order: number;
   characteristics: any[];
-  created_at: number;
-  updated_at: number;
+  created_at?: number;
+  updated_at?: number;
   paths: any;
   flows: ApiImportFlow[];
   comment_required: boolean;
