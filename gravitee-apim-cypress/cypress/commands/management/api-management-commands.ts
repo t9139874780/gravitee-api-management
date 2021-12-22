@@ -78,3 +78,15 @@ export function getApiById(auth: BasicAuthentication, apiId: string) {
     },
   });
 }
+
+export function getApiMetadata(auth: BasicAuthentication, apiId: string) {
+  return cy.request({
+    method: 'GET',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/metadata`,
+    auth,
+    failOnStatusCode: false,
+    qs: {
+      root: true,
+    },
+  });
+}

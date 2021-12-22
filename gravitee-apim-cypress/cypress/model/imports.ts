@@ -146,10 +146,10 @@ export interface ApiImportPage {
 }
 
 export interface ApiImportMetadata {
-  key: string;
+  key?: string;
   name: string;
   format: ApiMetadataFormat;
   value: string;
-  defaultValue: string;
-  apiId: string;
+  defaultValue?: string;
+  apiId?: string;
 }
