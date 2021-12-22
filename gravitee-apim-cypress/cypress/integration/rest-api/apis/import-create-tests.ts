@@ -345,7 +345,7 @@ context('API - Imports', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok();
     });
 
-    it('should get API metadata from specified ID', () => {
+    it('should get the created API metadata', () => {
       getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
         key: 'team',
         name: 'team',

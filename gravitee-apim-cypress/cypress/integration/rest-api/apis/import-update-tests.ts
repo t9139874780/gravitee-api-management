@@ -405,4 +405,40 @@ context('API - Imports - Update', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
+
+  describe('Update API with metadata having key that does not yet exist', () => {
+    const apiId = '4fb4f3d7-e556-421c-b03f-5b2d3da3e774';
+
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    it('should create an API with no metadata', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it ('should update API with some metadata having a key that does not yet exist', () => {
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.metadata = [{
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Info Sec',
+      }];
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
+    });
+
+    it('should get the created API metadata', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Info Sec',
+        apiId: 'bc1287cb-b732-4ba1-b609-1e34d375b585',
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
 });
