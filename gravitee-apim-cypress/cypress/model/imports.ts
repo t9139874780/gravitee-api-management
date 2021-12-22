@@ -146,7 +146,7 @@ export interface ApiImportPage {
 }
 
 export interface ApiImportMetadata {
-  key: string;
+  key?: string;
   name: string;
   format: ApiMetadataFormat;
   value: string;

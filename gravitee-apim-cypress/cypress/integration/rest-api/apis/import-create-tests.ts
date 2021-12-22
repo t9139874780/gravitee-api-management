@@ -368,4 +368,36 @@ context('API - Imports', () => {
       deleteApi(ADMIN_USER, secondApiId).noContent();
     });
   });
+
+  describe('Create API with metadata having an empty key', () => {
+    const apiId = '4d73b285-5b87-4186-928e-f6f6240708f3';
+
+    const fakeApi = ApiImportFakers.api({
+      id: apiId,
+      metadata: [
+        {
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'QA',
+        },
+      ],
+    });
+
+    it('should create an API with some metadata having an empty key', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should get the API metadata', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'QA',
+        apiId: '4d73b285-5b87-4186-928e-f6f6240708f3',
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
 });
