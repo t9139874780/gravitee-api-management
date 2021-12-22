@@ -25,6 +25,8 @@ import { getPage, getPages } from '../../../commands/management/api-pages-manage
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
 import {ApiMetadataFormat, ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType, ApiVisibility} from '@model/apis';
 import {getPlan, getPlans} from "../../../commands/management/api-plans-management-commands";
+import {GroupFakers} from "../../../fixtures/fakers/groups";
+import {createGroup, deleteGroup, getGroup} from "../../../commands/management/environment-management-commands";
 
 context('API - Imports - Update', () => {
   describe('Update API which ID in URL does not exist', () => {
@@ -519,6 +521,99 @@ context('API - Imports - Update', () => {
 
     it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with with group name that already exists', () => {
+    const apiId = "70fbb369-5672-43e6-8a8c-ff7aa81a6055";
+    const groupName = 'customers';
+    const fakeGroup = GroupFakers.group({ name: groupName });
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    let groupId;
+
+    it ('should create a group with name "customers"', () => {
+      createGroup(ADMIN_USER, fakeGroup).created()
+          .its('body')
+          .should(body => {
+            expect(body.name).to.eq('customers');
+          })
+          .should('have.property', 'id')
+          .then(id => {
+            groupId = id;
+          });
+    });
+
+    it ('should create an API associated with no groups', () => {
+      importCreateApi(ADMIN_USER, fakeApi)
+          .ok()
+          .its('body')
+          .should('not.have.property', 'groups');
+    });
+
+    it ('should update the API, associating it to the group "customers"', () => {
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.groups = ['customers'];
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate)
+          .ok()
+          .its('body')
+          .should('have.property', 'groups')
+          .should('have.length', 1)
+          .its(0)
+          .should('eq', groupId);
+    });
+
+    it ('should delete the group', () => {
+      deleteGroup(ADMIN_USER, groupId).noContent();
+    });
+
+    it ('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with with group name that does not exists', () => {
+    const apiId = "bc071378-7fb5-45df-841a-a2518668ae60";
+    const groupName = 'sales';
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    let groupId;
+
+    it ('should create an API associated with no groups', () => {
+      importCreateApi(ADMIN_USER, fakeApi)
+          .ok()
+          .its('body')
+          .should('not.have.property', 'groups');
+    });
+
+    it ('should update the API, associating it to the group "sales"', () => {
+      const apiUpdate = ApiImportFakers.api(fakeApi);
+      apiUpdate.groups = ['sales'];
+
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate)
+          .ok()
+          .its('body')
+          .should('have.property', 'groups')
+          .should('have.length', 1)
+          .its(0)
+          .should('eq', groupId);
+    });
+
+    it ('should get the created group', () => {
+      getGroup(ADMIN_USER, groupId)
+          .ok()
+          .its('body')
+          .should('have.property', 'name')
+          .should('eq', 'sales')
+    });
+
+    it ('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+
+    it ('should delete the group', () => {
+      deleteGroup(ADMIN_USER, groupId).noContent();
     });
   });
 });
