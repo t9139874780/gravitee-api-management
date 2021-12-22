@@ -150,6 +150,6 @@ export interface ApiImportMetadata {
   name: string;
   format: ApiMetadataFormat;
   value: string;
-  defaultValue: string;
-  apiId: string;
+  defaultValue?: string;
+  apiId?: string;
 }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
-import { deleteApi, importCreateApi, getApiById } from '../../../commands/management/api-management-commands';
-import { getPages, getPage } from '../../../commands/management/api-pages-management-commands';
+import { deleteApi, getApiById, getApiMetadata, importCreateApi } from '../../../commands/management/api-management-commands';
+import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
+import { ApiMetadataFormat } from '@model/apis';
 import {getPlan} from "../../../commands/management/api-plans-management-commands";
 import {ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType} from "@model/apis";
 
@@ -271,4 +272,100 @@ context('API - Imports', () => {
     });
   });
 
+
+  describe('Create API with metadata having key that does not yet exist', () => {
+    const apiId = 'bc1287cb-b732-4ba1-b609-1e34d375b585';
+
+    const fakeApi = ApiImportFakers.api({
+      id: apiId,
+      metadata: [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'API Management',
+        },
+      ],
+    });
+
+    it('should create an API with metadata', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should get API metadata from specified ID', () => {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'API Management',
+        apiId: 'bc1287cb-b732-4ba1-b609-1e34d375b585',
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Create API with metadata having key already that already exists on an other API', () => {
+    const firstApiId = 'b68e1a9c-a344-460d-b0ac-1d86d61b70cf';
+    const secondApiId = '5668f9f0-12af-4541-b834-c374faedfb57';
+
+    const firstApi = ApiImportFakers.api({
+      id: firstApiId,
+      metadata: [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'API Management',
+        },
+      ],
+    });
+
+    const secondApi = ApiImportFakers.api({
+      id: secondApiId,
+      metadata: [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'Access Management',
+        },
+      ],
+    })
+
+    it ('should create a first API with some metadata having a key named "team"', () => {
+      importCreateApi(ADMIN_USER, firstApi).ok();
+    });
+
+    it ('should create a second API with metadata having a key named "team"', () => {
+      importCreateApi(ADMIN_USER, secondApi).ok();
+    });
+
+    it ('should get API metadata for the first API', () => {
+      getApiMetadata(ADMIN_USER, firstApiId).ok().its('body').its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'API Management',
+        apiId: 'b68e1a9c-a344-460d-b0ac-1d86d61b70cf',
+      });
+    });
+
+    it ('should get API metadata for the second API', () => {
+      getApiMetadata(ADMIN_USER, secondApiId).ok().its('body').its(0).should('deep.equal', {
+        key: 'team',
+        name: 'team',
+        format: ApiMetadataFormat.STRING,
+        value: 'Access Management',
+        apiId: '5668f9f0-12af-4541-b834-c374faedfb57',
+      });
+    });
+
+    it ('should delete the APIs', () => {
+      deleteApi(ADMIN_USER, firstApiId).noContent();
+      deleteApi(ADMIN_USER, secondApiId).noContent();
+    });
+  });
 });
