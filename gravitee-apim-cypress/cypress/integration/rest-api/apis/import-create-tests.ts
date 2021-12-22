@@ -345,7 +345,7 @@ context('API - Imports', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok();
     });
 
-    it('should get API metadata from specified ID', () => {
+    it('should get the created API metadata', () => {
       getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
         key: 'team',
         name: 'team',
@@ -422,7 +422,7 @@ context('API - Imports', () => {
     });
   });
 
-  describe('Create API with metadata having an empty key', () => {
+  describe('Create API with metadata having an undefined key', () => {
     const apiId = '4d73b285-5b87-4186-928e-f6f6240708f3';
 
     const fakeApi = ApiImportFakers.api({
