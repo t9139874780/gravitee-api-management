@@ -18,9 +18,9 @@
   "pages": [
     {
       "id": "7b95cbe6-099d-4b06-95cb-e6099d7b0609",
-      "name": "Documentation",
+      "name": "Documentation (updated)",
       "type": "MARKDOWN",
-      "content": "# Documentation",
+      "content": "# Documentation\n##Contributing\nTo be done.",
       "order": 1,
       "lastContributor": "7f87e52e-32ad-4ee6-87e5-2e32adeee688",
       "published": false,

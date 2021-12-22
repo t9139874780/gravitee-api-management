@@ -93,7 +93,9 @@ export enum ApiImportProxyGroupLoadBalancerType {
 export interface ApiImportProxyGroup {
   name: string;
   endpoints: ApiImportProxyEndpoint[];
-  load_balancing: ApiImportProxyGroupLoadBalancerType;
+  load_balancing: {
+    type: ApiImportProxyGroupLoadBalancerType;
+  };
   http?: ApiImportProxyHttpEndpoint;
 }
 
@@ -105,6 +107,7 @@ export interface ApiImportProxy {
 }
 
 export interface ApiImport {
+  id?: string;
   name: string;
   version: string;
   description: string;
@@ -113,8 +116,9 @@ export interface ApiImport {
   flow_mode: ApiFlowMode;
   resources: any[];
   properties: any[];
+  groups: string[];
   members: ApiImportMember[];
-  page: ApiImportPage[];
+  pages: ApiImportPage[];
   plans: ApiImportPlan[];
   metadata: ApiImportMetadata[];
   path_mappings: string[];
@@ -124,18 +128,21 @@ export interface ApiImport {
 }
 
 export interface ApiImportPage {
-  id: string;
+  id?: string;
   name: string;
   type: ApiPageType;
+  content?: string;
   order: number;
   published: boolean;
   visibility: ApiVisibility;
-  lastModificationDate: number;
+  lastModificationDate?: number;
+  lastContributor?: string;
   contentType: string;
   homepage: boolean;
   parentPath: string;
   excludedAccessControls: boolean;
   accessControls: any[];
+  api?: string;
 }
 
 export interface ApiImportMetadata {
