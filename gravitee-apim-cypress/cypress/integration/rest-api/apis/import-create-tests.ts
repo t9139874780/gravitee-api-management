@@ -20,6 +20,8 @@ import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
 import { ApiMetadataFormat } from '@model/apis';
 import {getPlan} from "../../../commands/management/api-plans-management-commands";
 import {ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType} from "@model/apis";
+import {GroupFakers} from "../../../fixtures/fakers/groups";
+import {createGroup, deleteGroup} from "../../../commands/management/environment-management-commands";
 
 context('API - Imports', () => {
 
@@ -450,6 +452,45 @@ context('API - Imports', () => {
     });
 
     it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Create API with with group name that already exists', () => {
+    const apiId = "7ffe12cc-15b9-48ff-b436-0c9bb18b2816";
+    const groupName = 'architecture';
+    const fakeGroup = GroupFakers.group({ name: groupName });
+    const fakeApi = ApiImportFakers.api({ id: apiId, groups: [ groupName ] });
+
+    let groupId;
+
+    it ('should create a group with name "architecture"', () => {
+      createGroup(ADMIN_USER, fakeGroup).created()
+          .its('body')
+          .should(body => {
+            expect(body.name).to.eq('architecture');
+          })
+          .should('have.property', 'id')
+          .then(id => {
+            groupId = id;
+          });
+    });
+
+    it ('should create an API associated to the "architecture" group', () => {
+      importCreateApi(ADMIN_USER, fakeApi)
+          .ok()
+          .its('body')
+          .should('have.property', 'groups')
+          .should('have.length', 1)
+          .its(0)
+          .should('eq', groupId);
+    });
+
+    it ('should delete the group', () => {
+      deleteGroup(ADMIN_USER, groupId).noContent();
+    });
+
+    it ('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
