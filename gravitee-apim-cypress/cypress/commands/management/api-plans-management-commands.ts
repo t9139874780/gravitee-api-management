@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 import { BasicAuthentication } from '@model/users';
+import {ApiPlanStatus} from "@model/apis";
 
-export function getPlans(auth: BasicAuthentication, apiId: string) {
+export function getPlans(auth: BasicAuthentication, apiId: string, status: ApiPlanStatus) {
   return cy.request({
     method: 'GET',
-    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/plans`,
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/plans?status=${status}`,
     auth,
     failOnStatusCode: false,
     qs: {

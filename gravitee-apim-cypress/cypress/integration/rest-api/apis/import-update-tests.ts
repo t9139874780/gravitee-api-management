@@ -17,7 +17,8 @@ import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
 import { deleteApi, getApiById, importCreateApi, importUpdateApi } from '../../../commands/management/api-management-commands';
 import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
 import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import { ApiVisibility } from '@model/apis';
+import {ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType, ApiVisibility} from '@model/apis';
+import {getPlan, getPlans} from "../../../commands/management/api-plans-management-commands";
 
 context('API - Imports - Update', () => {
   describe('Update API which ID in URL does not exist', () => {
@@ -338,6 +339,47 @@ context('API - Imports - Update', () => {
 
     it('should not have deleted pages', () => {
       getPages(ADMIN_USER, apiId).ok().its('body').should('have.length', 3);
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with plans without ID', () => {
+
+    const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
+    const fakePlan1 = ApiImportFakers.plan({name: 'test plan 1', description: 'this is a test plan'});
+    const fakePlan2 = ApiImportFakers.plan({name: 'test plan 2', description: 'this is a test plan'});
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    // this update API, creating 2 plans
+    const updatedFakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1, fakePlan2] });
+
+    it('should create the API', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should update the API', () => {
+      importUpdateApi(ADMIN_USER, apiId, updatedFakeApi).ok();
+    });
+
+    it('should get 2 plans created on API', () => {
+      getPlans(ADMIN_USER, apiId, ApiPlanStatus.STAGING).ok().should((response) => {
+        expect(response.body).to.have.length(2);
+        expect(response.body[0].description).to.eq('this is a test plan');
+        expect(response.body[0].validation).to.eq(ApiPlanValidationType.AUTO);
+        expect(response.body[0].security).to.eq(ApiPlanSecurityType.KEY_LESS);
+        expect(response.body[0].type).to.eq(ApiPlanType.API);
+        expect(response.body[0].status).to.eq(ApiPlanStatus.STAGING);
+        expect(response.body[0].order).to.eq(0);
+        expect(response.body[1].description).to.eq('this is a test plan');
+        expect(response.body[1].validation).to.eq(ApiPlanValidationType.AUTO);
+        expect(response.body[1].security).to.eq(ApiPlanSecurityType.KEY_LESS);
+        expect(response.body[1].type).to.eq(ApiPlanType.API);
+        expect(response.body[1].status).to.eq(ApiPlanStatus.STAGING);
+        expect(response.body[1].order).to.eq(0);
+      });
     });
 
     it('should delete the API', () => {
