@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
-import { deleteApi, getApiById, importCreateApi, importUpdateApi } from '../../../commands/management/api-management-commands';
-import { getPage } from '../../../commands/management/api-pages-management-commands';
-import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import {fake} from "faker";
+import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
+import {
+  deleteApi,
+  getApiById,
+  importCreateApi,
+  importUpdateApi
+} from '../../../commands/management/api-management-commands';
+import {getPage} from '../../../commands/management/api-pages-management-commands';
+import {ApiImportFakers} from '../../../fixtures/fakers/api-imports';
+import {ApiVisibility} from "@model/apis";
 
 context('API - Imports - Update', () => {
   describe('Update API which ID in URL does not exist', () => {
@@ -77,26 +82,35 @@ context('API - Imports - Update', () => {
   });
 
   describe('Update API which ID in URL exists, without ID in body', () => {
-    let apiId;
+
+    const apiId = '67d8020e-b0b3-47d8-9802-0eb0b357d84c';
+    const fakeCreateApi = ApiImportFakers.api({ id: apiId });
+
+    // update API data. body doesn't contains API id
+    const fakeUpdateApi = ApiImportFakers.api(
+        {
+          name: 'updatedName',
+          version: '1.1',
+          description: 'Updated API description',
+          visibility: ApiVisibility.PUBLIC,
+        }
+    );
+    fakeUpdateApi.proxy.virtual_hosts[0].path = "/updated/path";
 
     it('should create API with the specified ID', () => {
-      cy.fixture('json/imports/apis/api-empty-with-id').then((definition) => {
-        importCreateApi(ADMIN_USER, definition)
-          .ok()
-          .should((response) => {
-            apiId = response.body.id;
-          });
-      });
+      importCreateApi(ADMIN_USER, fakeCreateApi)
+        .ok()
+        .should((response) => {
+          expect(response.body.id).to.eq(apiId);
+        });
     });
 
     it('should update the API with the specified ID, even if no ID in body', () => {
-      cy.fixture('json/imports/apis/api-empty-without-id-updated-data').then((definition) => {
-        importUpdateApi(ADMIN_USER, apiId, definition)
-          .ok()
-          .should((response) => {
-            expect(response.body.id).to.eq(apiId);
-          });
-      });
+      importUpdateApi(ADMIN_USER, apiId, fakeUpdateApi)
+        .ok()
+        .should((response) => {
+          expect(response.body.id).to.eq(apiId);
+        });
     });
 
     it('should get updated API with updated data', () => {
