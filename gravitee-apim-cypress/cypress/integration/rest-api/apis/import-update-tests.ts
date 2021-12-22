@@ -576,7 +576,7 @@ context('API - Imports - Update', () => {
   describe('Update API with with group name that does not exists', () => {
     const apiId = "bc071378-7fb5-45df-841a-a2518668ae60";
     const groupName = 'sales';
-    const fakeApi = ApiImportFakers.api({ id: apiId });
+    const fakeApi = ApiImportFakers.api({ id: apiId, groups: ['support'] });
 
     let groupId;
 
@@ -584,12 +584,13 @@ context('API - Imports - Update', () => {
       importCreateApi(ADMIN_USER, fakeApi)
           .ok()
           .its('body')
-          .should('not.have.property', 'groups');
+          .should('have.property', 'groups')
+          .should('have.length', 1);
     });
 
     it ('should update the API, associating it to the group "sales"', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
-      apiUpdate.groups = ['sales'];
+      apiUpdate.groups = [groupName];
 
       importUpdateApi(ADMIN_USER, apiId, apiUpdate)
           .ok()
@@ -597,7 +598,9 @@ context('API - Imports - Update', () => {
           .should('have.property', 'groups')
           .should('have.length', 1)
           .its(0)
-          .should('eq', groupId);
+          .then(id => {
+            groupId = id;
+          });
     });
 
     it ('should get the created group', () => {
@@ -606,6 +609,14 @@ context('API - Imports - Update', () => {
           .its('body')
           .should('have.property', 'name')
           .should('eq', 'sales')
+    });
+
+    it ('should get the created group', () => {
+      getGroup(ADMIN_USER, groupId)
+          .ok()
+          .its('body')
+          .should('have.property', 'name')
+          .should('eq', groupName)
     });
 
     it ('should delete the API', () => {
