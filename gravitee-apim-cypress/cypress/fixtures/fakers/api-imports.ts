@@ -41,7 +41,7 @@ export class ApiImportFakers {
       flow_mode: ApiFlowMode.DEFAULT,
       resources: [],
       properties: [],
-      groups: ['wireless purple systems'],
+      groups: [],
       members: [],
       pages: [],
       plans: [],
