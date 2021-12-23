@@ -85,7 +85,6 @@ export class ApiImportFakers {
         ],
       },
       response_templates: {},
-      primaryOwner: {},
       ...attributes,
     };
   }

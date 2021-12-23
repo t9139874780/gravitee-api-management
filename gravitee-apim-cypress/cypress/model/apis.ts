@@ -179,3 +179,9 @@ export interface ApiRatingResponse {
   updateAt: number;
   answers: [];
 }
+
+export enum ApiPrimaryOwnerMode {
+  HYBRID = 'HYBRID',
+  USER = 'USER',
+  GROUP = 'GROUP'
+}

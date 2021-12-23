@@ -13,15 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
-import { deleteApi, getApiById, getApiMetadata, importCreateApi } from '../../../commands/management/api-management-commands';
-import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
-import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import { ApiMetadataFormat } from '@model/apis';
-import { getPlan } from '../../../commands/management/api-plans-management-commands';
-import { ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType } from '@model/apis';
-import { GroupFakers } from '../../../fixtures/fakers/groups';
-import { createGroup, deleteGroup, getGroup } from '../../../commands/management/environment-management-commands';
+import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
+import {
+  deleteApi,
+  getApiById,
+  getApiMetadata,
+  importCreateApi
+} from '../../../commands/management/api-management-commands';
+import {getPage, getPages} from '../../../commands/management/api-pages-management-commands';
+import {ApiImportFakers} from '../../../fixtures/fakers/api-imports';
+import {
+  ApiMetadataFormat,
+  ApiPlanSecurityType,
+  ApiPlanStatus,
+  ApiPlanType,
+  ApiPlanValidationType,
+  ApiPrimaryOwnerMode
+} from '@model/apis';
+import {getPlan} from '../../../commands/management/api-plans-management-commands';
+import {GroupFakers} from '../../../fixtures/fakers/groups';
+import {createGroup, deleteGroup, getGroup} from '../../../commands/management/environment-management-commands';
+import {getCurrentUser} from "../../../commands/management/user-management-commands";
 
 context('API - Imports', () => {
   describe('Create API from import', () => {
@@ -552,6 +564,43 @@ context('API - Imports', () => {
   });
 
   describe('Create API form import with primary owner', () => {
+    describe('Create API with primary owner of type "USER", already existing with same id', () => {
+      const apiId = '92d900c3-7497-4739-bb98-a8f3615c2773';
+      const fakeApi = ApiImportFakers.api({ id: apiId });
 
+      let userId;
+
+      it ('should get admin user ID', () => {
+        getCurrentUser(ADMIN_USER).ok()
+            .its('body')
+            .should('have.property', 'id')
+            .then(id => {
+              userId = id;
+            });
+      });
+
+      it ('should create an API with admin as a primary owner', () => {
+        fakeApi.primaryOwner = { id: userId, type: ApiPrimaryOwnerMode.USER, email: 'john.doe@domain.tld' };
+        importCreateApi(ADMIN_USER, fakeApi)
+            .ok()
+            .its('body')
+            .should('have.property', 'owner')
+            .should('have.property', 'id')
+            .should('eq', userId);
+      });
+
+      it ('should not have updated user email', () => {
+        getCurrentUser(ADMIN_USER).ok()
+            .its('body')
+            .should(user => {
+              expect(user.primaryOwner).to.be.true;
+              expect(user.email).to.not.exist;
+            });
+      });
+
+      it ('should delete the API', () => {
+        deleteApi(ADMIN_USER, apiId).noContent();
+      });
+    });
   });
 });

@@ -35,7 +35,7 @@ import {getPlans} from "../../../commands/management/api-plans-management-comman
 import {GroupFakers} from "../../../fixtures/fakers/groups";
 import {createGroup, deleteGroup, getGroup} from "../../../commands/management/environment-management-commands";
 
-context.only('API - Imports - Update', () => {
+context('API - Imports - Update', () => {
   describe('Update API from import', () => {
     describe('Update API which ID in URL does not exist', () => {
       const api = ApiImportFakers.api({ id: 'unknown-test-id' });

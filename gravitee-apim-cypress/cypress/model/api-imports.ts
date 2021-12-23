@@ -22,7 +22,7 @@ import {
   ApiPlanType,
   ApiPlanStatus,
   ApiFlowOperator,
-  ApiMetadataFormat,
+  ApiMetadataFormat, ApiPrimaryOwnerMode,
 } from '@model/apis';
 
 export interface ApiImportMember {
@@ -106,6 +106,13 @@ export interface ApiImportProxy {
   groups: ApiImportProxyGroup[];
 }
 
+export interface ApiImportPrimaryOwner {
+  id: string;
+  type: ApiPrimaryOwnerMode;
+  displayName?: string;
+  email?: string;
+}
+
 export interface ApiImport {
   id?: string;
   name: string;
@@ -124,7 +131,8 @@ export interface ApiImport {
   path_mappings: string[];
   proxy: ApiImportProxy;
   response_templates: any;
-  primaryOwner: any;
+  owner?: ApiImportPrimaryOwner;
+  primaryOwner?: ApiImportPrimaryOwner;
 }
 
 export interface ApiImportPage {
