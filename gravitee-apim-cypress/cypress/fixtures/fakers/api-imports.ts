@@ -25,6 +25,7 @@ import {
   ApiVisibility
 } from '@model/apis';
 import { ApiFakers } from './apis';
+import {ApiUser} from "@model/users";
 
 export class ApiImportFakers {
   static api(attributes?: Partial<ApiImport>): ApiImport {
@@ -128,4 +129,20 @@ export class ApiImportFakers {
       ...attributes,
     };
   }
+
+  static user(attributes?: Partial<ApiUser>): ApiUser {
+    const firstname = faker.name.firstName();
+    const lastname = faker.name.lastName();
+    const email = faker.internet.email(firstname, lastname);
+
+    return {
+      firstname,
+      lastname,
+      email,
+      source: 'gravitee',
+      sourceId: '',
+      service: false,
+      ...attributes,
+    };
+  };
 }
