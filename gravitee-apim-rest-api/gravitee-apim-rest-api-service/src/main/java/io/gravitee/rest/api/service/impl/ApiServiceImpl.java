@@ -927,10 +927,10 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
 
     @Override
     public Set<String> findIdsByUser(String userId, ApiQuery apiQuery, Sortable sortable, boolean portal) {
-        Optional<List<String>> optionalTargetIds = this.searchInDefinition(apiQuery);
+        Optional<Collection<String>> optionalTargetIds = this.searchInDefinition(apiQuery);
 
         if (optionalTargetIds.isPresent()) {
-            List<String> targetIds = optionalTargetIds.get();
+            Collection<String> targetIds = optionalTargetIds.get();
             if (targetIds.isEmpty()) {
                 return Collections.emptySet();
             }
@@ -2176,10 +2176,10 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         try {
             LOGGER.debug("Search paginated APIs by {}", query);
 
-            Optional<List<String>> optionalTargetIds = this.searchInDefinition(query);
+            Optional<Collection<String>> optionalTargetIds = this.searchInDefinition(query);
 
             if (optionalTargetIds.isPresent()) {
-                List<String> targetIds = optionalTargetIds.get();
+                Collection<String> targetIds = optionalTargetIds.get();
                 if (targetIds.isEmpty()) {
                     return new Page(Collections.emptyList(), 0, 0, 0);
                 }
@@ -2224,10 +2224,10 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         try {
             LOGGER.debug("Search APIs by {}", query);
 
-            Optional<List<String>> optionalTargetIds = this.searchInDefinition(query);
+            Optional<Collection<String>> optionalTargetIds = this.searchInDefinition(query);
 
             if (optionalTargetIds.isPresent()) {
-                List<String> targetIds = optionalTargetIds.get();
+                Collection<String> targetIds = optionalTargetIds.get();
                 if (targetIds.isEmpty()) {
                     return Collections.emptySet();
                 }
@@ -2247,10 +2247,10 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
     public Collection<String> searchIds(ApiQuery query) {
         try {
             LOGGER.debug("Search API ids by {}", query);
-            Optional<List<String>> optionalTargetIds = this.searchInDefinition(query);
+            Optional<Collection<String>> optionalTargetIds = this.searchInDefinition(query);
 
             if (optionalTargetIds.isPresent()) {
-                List<String> targetIds = optionalTargetIds.get();
+                Collection<String> targetIds = optionalTargetIds.get();
                 if (targetIds.isEmpty()) {
                     return Collections.emptySet();
                 }
@@ -2270,7 +2270,7 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         try {
             LOGGER.debug("Search paged APIs by {}", query);
 
-            Set<String> apiIds = this.buildSearchStream(query, filters).collect(toSet());
+            Collection<String> apiIds = this.searchIds(query, filters);
 
             if (apiIds.isEmpty()) {
                 return new Page<>(emptyList(), 0, 0, 0);
@@ -2285,7 +2285,7 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
 
     @Override
     public Collection<ApiEntity> search(String query, Map<String, Object> filters) {
-        return this.buildSearchStream(query, filters).map(this::findById).collect(toList());
+        return this.searchInDefinition(query, filters).getDocuments().stream().map(this::findById).collect(toList());
     }
 
     /**
@@ -2294,7 +2294,7 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
      * @return Optional<List < String>> an optional list of api ids and Optional.empty()
      * if ApiQuery doesn't contain fields stores in the api definition.
      */
-    private Optional<List<String>> searchInDefinition(ApiQuery apiQuery) {
+    private Optional<Collection<String>> searchInDefinition(ApiQuery apiQuery) {
         if (apiQuery == null) {
             return Optional.empty();
         }
@@ -2304,6 +2304,11 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         }
         SearchResult matchApis = searchEngineService.search(searchEngineQuery);
         return Optional.of(matchApis.getDocuments());
+    }
+
+    private SearchResult searchInDefinition(String query, Map<String, Object> filters) {
+        Query<ApiEntity> searchEngineQuery = QueryBuilder.create(ApiEntity.class).setQuery(query).setFilters(filters).build();
+        return searchEngineService.search(searchEngineQuery);
     }
 
     private QueryBuilder<ApiEntity> convert(ApiQuery query) {
@@ -2325,15 +2330,9 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
         return searchEngineQuery;
     }
 
-    private Stream<String> buildSearchStream(String query, Map<String, Object> filters) {
-        Query<ApiEntity> apiQuery = QueryBuilder.create(ApiEntity.class).setQuery(query).setFilters(filters).build();
-        SearchResult matchApis = searchEngineService.search(apiQuery);
-        return matchApis.getDocuments().parallelStream();
-    }
-
     @Override
     public Collection<String> searchIds(String query, Map<String, Object> filters) {
-        return this.buildSearchStream(query, filters).collect(toList());
+        return this.searchInDefinition(query, filters).getDocuments();
     }
 
     @Override
@@ -2999,7 +2998,9 @@ public class ApiServiceImpl extends AbstractService implements ApiService {
             throw new PaginationInvalidException();
         }
         List<String> subsetApiIds = apiIds.stream().skip(startIndex).limit(pageable.getPageSize()).collect(toList());
+        Comparator<String> orderingComparator = Comparator.comparingInt(subsetApiIds::indexOf);
         List<ApiEntity> subsetApis = convert(apiRepository.search(queryToCriteria(null).ids(subsetApiIds).build()));
+        subsetApis.sort((o1, o2) -> orderingComparator.compare(o1.getId(), o2.getId()));
         return new Page<>(subsetApis, pageable.getPageNumber(), pageable.getPageSize(), apiIds.size());
     }
 
