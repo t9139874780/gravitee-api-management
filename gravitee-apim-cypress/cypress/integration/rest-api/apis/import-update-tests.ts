@@ -19,7 +19,7 @@ import {
   getApiById,
   getApiMetadata,
   importCreateApi,
-  importUpdateApi
+  importUpdateApi,
 } from '../../../commands/management/api-management-commands';
 import {getPage, getPages} from '../../../commands/management/api-pages-management-commands';
 import {ApiImportFakers} from '../../../fixtures/fakers/api-imports';
@@ -367,12 +367,14 @@ context('API - Imports - Update', () => {
 
     const fakeApi = ApiImportFakers.api({
       id: apiId,
-      metadata: [{
-        key: 'team',
-        name: 'team',
-        format: ApiMetadataFormat.STRING,
-        value: 'Ops',
-      }]
+      metadata: [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'Ops',
+        },
+      ],
     });
 
     it('should create an API with some metadata having a key with value "team"', () => {
@@ -380,7 +382,7 @@ context('API - Imports - Update', () => {
     });
 
     it('should get the API metadata', () => {
-      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').should('have.length', 2).should('deep.include', {
         key: 'team',
         name: 'team',
         format: ApiMetadataFormat.STRING,
@@ -389,29 +391,35 @@ context('API - Imports - Update', () => {
       });
     });
 
-    it ('should update the API metadata having the key "team"', () => {
+    it('should update the API metadata having the key "team"', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
-      apiUpdate.metadata = [{
-        key: 'team',
-        name: 'team',
-        format: ApiMetadataFormat.STRING,
-        value: 'DevOps',
-      }];
+      apiUpdate.metadata = [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'DevOps',
+        },
+      ];
 
-      importUpdateApi(ADMIN_USER, apiId, fakeApi).ok();
+      importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
     });
 
     it('should get the updated API metadata', () => {
-      getApiMetadata(ADMIN_USER, apiId).ok().its('body').should('have.length', 2).its(0).should('deep.equal', {
-        key: 'team',
-        name: 'team',
-        format: ApiMetadataFormat.STRING,
-        value: 'DevOps',
-        apiId: 'aa7f03dc-4ccf-434b-80b2-e5af22b0c76a',
-      });
+      getApiMetadata(ADMIN_USER, apiId)
+        .ok()
+        .its('body')
+        .should('have.length', 2)
+        .should('deep.include', {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'DevOps',
+          apiId: 'aa7f03dc-4ccf-434b-80b2-e5af22b0c76a',
+        });
     });
 
-    it ('should delete the API', () => {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
@@ -425,25 +433,27 @@ context('API - Imports - Update', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok();
     });
 
-    it ('should update API with some metadata having a key that does not yet exist', () => {
+    it('should update API with some metadata having a key that does not yet exist', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
-      apiUpdate.metadata = [{
-        key: 'team',
-        name: 'team',
-        format: ApiMetadataFormat.STRING,
-        value: 'Info Sec',
-      }];
+      apiUpdate.metadata = [
+        {
+          key: 'team',
+          name: 'team',
+          format: ApiMetadataFormat.STRING,
+          value: 'Info Sec',
+        },
+      ];
 
       importUpdateApi(ADMIN_USER, apiId, apiUpdate).ok();
     });
 
     it('should get the created API metadata', () => {
-      getApiMetadata(ADMIN_USER, apiId).ok().its('body').its(0).should('deep.equal', {
+      getApiMetadata(ADMIN_USER, apiId).ok().its('body').should('deep.include', {
         key: 'team',
         name: 'team',
         format: ApiMetadataFormat.STRING,
         value: 'Info Sec',
-        apiId: 'bc1287cb-b732-4ba1-b609-1e34d375b585',
+        apiId: '4fb4f3d7-e556-421c-b03f-5b2d3da3e774',
       });
     });
 
@@ -456,16 +466,16 @@ context('API - Imports - Update', () => {
     const apiId = 'a67e7015-224c-4c32-abaa-231f58d4e542';
 
     const fakeApi = ApiImportFakers.api({
-      id: apiId
+      id: apiId,
     });
 
     it('should create an API with no metadata', () => {
       importCreateApi(ADMIN_USER, fakeApi).ok();
     });
 
-    it ('should update the API, adding metadata with an undefined key', () => {
+    it('should update the API, adding metadata with an undefined key', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
-      apiUpdate.metadata =  [
+      apiUpdate.metadata = [
         {
           name: 'team',
           format: ApiMetadataFormat.STRING,
@@ -481,7 +491,7 @@ context('API - Imports - Update', () => {
         name: 'team',
         format: ApiMetadataFormat.STRING,
         value: 'Product',
-        apiId: '6e7ea58c-519d-4ba6-957b-ea49912627e6',
+        apiId: 'a67e7015-224c-4c32-abaa-231f58d4e542',
       });
     });
 
@@ -491,10 +501,9 @@ context('API - Imports - Update', () => {
   });
 
   describe('Update API with plans without ID', () => {
-
     const apiId = '08a92f8c-e133-42ec-a92f-8ce13382ec73';
-    const fakePlan1 = ApiImportFakers.plan({name: 'test plan 1', description: 'this is a test plan'});
-    const fakePlan2 = ApiImportFakers.plan({name: 'test plan 2', description: 'this is a test plan'});
+    const fakePlan1 = ApiImportFakers.plan({ name: 'test plan 1', description: 'this is a test plan' });
+    const fakePlan2 = ApiImportFakers.plan({ name: 'test plan 2', description: 'this is a test plan' });
     const fakeApi = ApiImportFakers.api({ id: apiId });
 
     // this update API, creating 2 plans
@@ -509,21 +518,23 @@ context('API - Imports - Update', () => {
     });
 
     it('should get 2 plans created on API', () => {
-      getPlans(ADMIN_USER, apiId, ApiPlanStatus.STAGING).ok().should((response) => {
-        expect(response.body).to.have.length(2);
-        expect(response.body[0].description).to.eq('this is a test plan');
-        expect(response.body[0].validation).to.eq(ApiPlanValidationType.AUTO);
-        expect(response.body[0].security).to.eq(ApiPlanSecurityType.KEY_LESS);
-        expect(response.body[0].type).to.eq(ApiPlanType.API);
-        expect(response.body[0].status).to.eq(ApiPlanStatus.STAGING);
-        expect(response.body[0].order).to.eq(0);
-        expect(response.body[1].description).to.eq('this is a test plan');
-        expect(response.body[1].validation).to.eq(ApiPlanValidationType.AUTO);
-        expect(response.body[1].security).to.eq(ApiPlanSecurityType.KEY_LESS);
-        expect(response.body[1].type).to.eq(ApiPlanType.API);
-        expect(response.body[1].status).to.eq(ApiPlanStatus.STAGING);
-        expect(response.body[1].order).to.eq(0);
-      });
+      getPlans(ADMIN_USER, apiId, ApiPlanStatus.STAGING)
+        .ok()
+        .should((response) => {
+          expect(response.body).to.have.length(2);
+          expect(response.body[0].description).to.eq('this is a test plan');
+          expect(response.body[0].validation).to.eq(ApiPlanValidationType.AUTO);
+          expect(response.body[0].security).to.eq(ApiPlanSecurityType.KEY_LESS);
+          expect(response.body[0].type).to.eq(ApiPlanType.API);
+          expect(response.body[0].status).to.eq(ApiPlanStatus.STAGING);
+          expect(response.body[0].order).to.eq(0);
+          expect(response.body[1].description).to.eq('this is a test plan');
+          expect(response.body[1].validation).to.eq(ApiPlanValidationType.AUTO);
+          expect(response.body[1].security).to.eq(ApiPlanSecurityType.KEY_LESS);
+          expect(response.body[1].type).to.eq(ApiPlanType.API);
+          expect(response.body[1].status).to.eq(ApiPlanStatus.STAGING);
+          expect(response.body[1].order).to.eq(0);
+        });
     });
 
     it('should delete the API', () => {
@@ -623,105 +634,89 @@ context('API - Imports - Update', () => {
   });
 
   describe('Update API with with group name that already exists', () => {
-    const apiId = "70fbb369-5672-43e6-8a8c-ff7aa81a6055";
+    const apiId = '70fbb369-5672-43e6-8a8c-ff7aa81a6055';
     const groupName = 'customers';
     const fakeGroup = GroupFakers.group({ name: groupName });
     const fakeApi = ApiImportFakers.api({ id: apiId });
 
     let groupId;
 
-    it ('should create a group with name "customers"', () => {
-      createGroup(ADMIN_USER, fakeGroup).created()
-          .its('body')
-          .should(body => {
-            expect(body.name).to.eq('customers');
-          })
-          .should('have.property', 'id')
-          .then(id => {
-            groupId = id;
-          });
+    it('should create a group with name "customers"', () => {
+      createGroup(ADMIN_USER, fakeGroup)
+        .created()
+        .its('body')
+        .should((body) => {
+          expect(body.name).to.eq('customers');
+        })
+        .should('have.property', 'id')
+        .then((id) => {
+          groupId = id;
+        });
     });
 
-    it ('should create an API associated with no groups', () => {
-      importCreateApi(ADMIN_USER, fakeApi)
-          .ok()
-          .its('body')
-          .should('not.have.property', 'groups');
+    it('should create an API associated with no groups', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok().its('body')
+          .its('groups')
+          .should('be.empty');
     });
 
-    it ('should update the API, associating it to the group "customers"', () => {
+    it('should update the API, associating it to the group "customers"', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
       apiUpdate.groups = ['customers'];
 
       importUpdateApi(ADMIN_USER, apiId, apiUpdate)
-          .ok()
-          .its('body')
-          .should('have.property', 'groups')
-          .should('have.length', 1)
-          .its(0)
-          .should('eq', groupId);
+        .ok()
+        .its('body')
+        .should('have.property', 'groups')
+        .should('have.length', 1)
+        .its(0)
+        .should('eq', groupId);
     });
 
-    it ('should delete the group', () => {
+    it('should delete the group', () => {
       deleteGroup(ADMIN_USER, groupId).noContent();
     });
 
-    it ('should delete the API', () => {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
   });
 
   describe('Update API with with group name that does not exists', () => {
-    const apiId = "bc071378-7fb5-45df-841a-a2518668ae60";
+    const apiId = 'bc071378-7fb5-45df-841a-a2518668ae60';
     const groupName = 'sales';
     const fakeApi = ApiImportFakers.api({ id: apiId, groups: ['support'] });
 
     let groupId;
 
-    it ('should create an API associated with no groups', () => {
-      importCreateApi(ADMIN_USER, fakeApi)
-          .ok()
-          .its('body')
-          .should('have.property', 'groups')
-          .should('have.length', 1);
+    it('should create an API associated with no groups', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok().its('body').should('have.property', 'groups').should('have.length', 1);
     });
 
-    it ('should update the API, associating it to the group "sales"', () => {
+    it('should update the API, associating it to the group "sales"', () => {
       const apiUpdate = ApiImportFakers.api(fakeApi);
       apiUpdate.groups = [groupName];
 
       importUpdateApi(ADMIN_USER, apiId, apiUpdate)
-          .ok()
-          .its('body')
-          .should('have.property', 'groups')
-          .should('have.length', 1)
-          .its(0)
-          .then(id => {
-            groupId = id;
-          });
+        .ok()
+        .its('body')
+        .should('have.property', 'groups')
+        .should('have.length', 1)
+        .its(0)
+        .then((id) => {
+          groupId = id;
+        });
     });
 
-    it ('should get the created group', () => {
-      getGroup(ADMIN_USER, groupId)
-          .ok()
-          .its('body')
-          .should('have.property', 'name')
-          .should('eq', 'sales')
+    it('should get the created group', () => {
+      getGroup(ADMIN_USER, groupId).ok().its('body').should('have.property', 'name').should('eq', 'sales');
     });
 
-    it ('should get the created group', () => {
-      getGroup(ADMIN_USER, groupId)
-          .ok()
-          .its('body')
-          .should('have.property', 'name')
-          .should('eq', groupName)
-    });
-
-    it ('should delete the API', () => {
+    it('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
 
-    it ('should delete the group', () => {
+    it('should delete the group', () => {
       deleteGroup(ADMIN_USER, groupId).noContent();
     });
   });
