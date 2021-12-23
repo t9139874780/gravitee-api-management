@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import * as faker from 'faker';
-import {ApiImport, ApiImportPage, ApiImportPlan, ApiImportProxyGroupLoadBalancerType} from '@model/imports';
+import {ApiImport, ApiImportPage, ApiImportPlan, ApiImportProxyGroupLoadBalancerType} from '@model/api-imports';
 import {
   ApiFlowMode,
   ApiPageType,

@@ -15,7 +15,7 @@
  */
 
 import { Api, ApiErrorCodes, ApiLifecycleState, PortalApi } from '@model/apis';
-import { ApiImport } from '@model/imports';
+import { ApiImport } from '@model/api-imports';
 import { User, BasicAuthentication } from '@model/users';
 import { ErrorableManagement } from '@model/technical';
 
