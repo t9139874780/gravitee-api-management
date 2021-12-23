@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ADMIN_USER } from '../../../fixtures/fakers/users/users';
+import {ADMIN_USER} from '../../../fixtures/fakers/users/users';
 import {
   deleteApi,
   getApiById,
@@ -21,10 +21,17 @@ import {
   importCreateApi,
   importUpdateApi
 } from '../../../commands/management/api-management-commands';
-import { getPage, getPages } from '../../../commands/management/api-pages-management-commands';
-import { ApiImportFakers } from '../../../fixtures/fakers/api-imports';
-import {ApiMetadataFormat, ApiPlanSecurityType, ApiPlanStatus, ApiPlanType, ApiPlanValidationType, ApiVisibility} from '@model/apis';
-import {getPlan, getPlans} from "../../../commands/management/api-plans-management-commands";
+import {getPage, getPages} from '../../../commands/management/api-pages-management-commands';
+import {ApiImportFakers} from '../../../fixtures/fakers/api-imports';
+import {
+  ApiMetadataFormat,
+  ApiPlanSecurityType,
+  ApiPlanStatus,
+  ApiPlanType,
+  ApiPlanValidationType,
+  ApiVisibility
+} from '@model/apis';
+import {getPlans} from "../../../commands/management/api-plans-management-commands";
 import {GroupFakers} from "../../../fixtures/fakers/groups";
 import {createGroup, deleteGroup, getGroup} from "../../../commands/management/environment-management-commands";
 
@@ -516,6 +523,35 @@ context('API - Imports - Update', () => {
         expect(response.body[1].type).to.eq(ApiPlanType.API);
         expect(response.body[1].status).to.eq(ApiPlanStatus.STAGING);
         expect(response.body[1].order).to.eq(0);
+      });
+    });
+
+    it('should delete the API', () => {
+      deleteApi(ADMIN_USER, apiId).noContent();
+    });
+  });
+
+  describe('Update API with plans with ID', () => {
+
+    const apiId = '08a92f8c-e133-42ec-a92f-8ce13555ec73';
+    const fakePlan1 = ApiImportFakers.plan({id: '08a92f8c-e133-42ec-a92f-8ce139999999', name: 'test plan 1', description: 'this is a test plan', status: ApiPlanStatus.CLOSED});
+    const fakePlan2 = ApiImportFakers.plan({id: '08a92f8c-e133-42ec-a92f-8ce138888888', name: 'test plan 2', description: 'this is a test plan', status: ApiPlanStatus.CLOSED});
+    const fakeApi = ApiImportFakers.api({ id: apiId });
+
+    // this update API, creating 2 plans
+    const updatedFakeApi = ApiImportFakers.api({ id: apiId, plans: [fakePlan1, fakePlan2] });
+
+    it('should create the API', () => {
+      importCreateApi(ADMIN_USER, fakeApi).ok();
+    });
+
+    it('should update the API', () => {
+      importUpdateApi(ADMIN_USER, apiId, updatedFakeApi).ok();
+    });
+
+    it('should get 2 plans created on API, with specified status', () => {
+      getPlans(ADMIN_USER, apiId, ApiPlanStatus.CLOSED).ok().should((response) => {
+        expect(response.body).to.have.length(2);
       });
     });
 
