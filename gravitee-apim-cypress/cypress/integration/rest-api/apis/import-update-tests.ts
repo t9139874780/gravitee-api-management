@@ -611,14 +611,6 @@ context('API - Imports - Update', () => {
           .should('eq', 'sales')
     });
 
-    it ('should get the created group', () => {
-      getGroup(ADMIN_USER, groupId)
-          .ok()
-          .its('body')
-          .should('have.property', 'name')
-          .should('eq', groupName)
-    });
-
     it ('should delete the API', () => {
       deleteApi(ADMIN_USER, apiId).noContent();
     });
