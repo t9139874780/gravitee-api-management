@@ -47,8 +47,11 @@ public class PageDocumentTransformer implements DocumentTransformer<PageEntity> 
         doc.add(new StringField(FIELD_TYPE, FIELD_TYPE_VALUE, Field.Store.YES));
 
         if (page.getReferenceId() != null) {
-            doc.add(new StringField(FIELD_REFERENCE_TYPE, page.getReferenceType().toLowerCase(), Field.Store.NO));
+            String type = page.getReferenceType().toLowerCase();
+            doc.add(new StringField(FIELD_REFERENCE_TYPE, type, Field.Store.NO));
             doc.add(new StringField(FIELD_REFERENCE_ID, page.getReferenceId(), Field.Store.YES));
+
+            if ("api".equals(type)) {}
         }
 
         if (page.getName() != null) {
