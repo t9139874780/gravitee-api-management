@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Api, ApiErrorCodes, ApiLifecycleState, PortalApi } from '@model/apis';
+import {Api, ApiErrorCodes, ApiLifecycleState, ApiMember, PortalApi} from '@model/apis';
 import { ApiImport } from '@model/api-imports';
 import { User, BasicAuthentication } from '@model/users';
 import { ErrorableManagement } from '@model/technical';
@@ -88,5 +88,15 @@ export function getApiMetadata(auth: BasicAuthentication, apiId: string) {
     qs: {
       root: true,
     },
+  });
+}
+
+export function addMemberToApi(auth: BasicAuthentication, apiId: string, body: ApiMember){
+  return cy.request({
+    method: 'POST',
+    url: `${Cypress.config().baseUrl}${Cypress.env('managementApi')}/apis/${apiId}/members`,
+    body,
+    auth,
+    failOnStatusCode: false,
   });
 }

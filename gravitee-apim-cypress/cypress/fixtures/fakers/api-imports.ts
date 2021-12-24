@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 import * as faker from 'faker';
-import {ApiImport, ApiImportPage, ApiImportPlan, ApiImportProxyGroupLoadBalancerType} from '@model/api-imports';
 import {
-  ApiFlowMode,
+  ApiImport,
+  ApiImportMember,
+  ApiImportPage,
+  ApiImportPlan,
+  ApiImportProxyGroupLoadBalancerType
+} from '@model/api-imports';
+import {
+  ApiFlowMode, ApiMember,
   ApiPageType,
   ApiPlanSecurityType,
   ApiPlanStatus,
@@ -26,6 +32,7 @@ import {
 } from '@model/apis';
 import { ApiFakers } from './apis';
 import {ApiUser} from "@model/users";
+import {Role} from "@model/roles";
 
 export class ApiImportFakers {
   static api(attributes?: Partial<ApiImport>): ApiImport {
@@ -145,4 +152,25 @@ export class ApiImportFakers {
       ...attributes,
     };
   };
+
+  static member(attributes?: Partial<ApiImportMember>): ApiImportMember {
+    return {
+      source: 'google',
+      sourceId: faker.internet.email(),
+      roles: [],
+      ...attributes,
+    }
+  }
+
+  static role(attributes?: Partial<Role>): Role {
+    return {
+      default: false,
+      description: faker.commerce.productDescription(),
+      name: faker.commerce.productName(),
+      permissions: {},
+      scope: 'API',
+      system: false,
+      ...attributes,
+    }
+  }
 }
